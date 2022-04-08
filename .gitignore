@@ -1,0 +1,6 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+ipums-api-viewer/**.dat.gz
+ipums-api-viewer/**.xml
