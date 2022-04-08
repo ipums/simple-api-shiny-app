@@ -6,7 +6,10 @@ if(!require(remotes)){
 }
 
 #### Install/update ipumsr dev version with API support
-remotes::install_github("ipums/ipumsr", force = TRUE)
+
+if(!require(ipumsr) || packageVersion("ipumsr") != "0.4.5.9000" ){
+  remotes::install_github("ipums/ipumsr", force = TRUE)
+}
 
 
 if(!require(dplyr)){
