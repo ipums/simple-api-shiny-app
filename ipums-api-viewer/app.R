@@ -27,6 +27,7 @@ library(shiny)
 library(ipumsr)
 library(dplyr)
 library(stringr)
+library(ggplot2)
 
 ## Set up wait for extract
 
