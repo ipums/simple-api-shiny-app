@@ -2,5 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-ipums-api-viewer/**.dat.gz
-ipums-api-viewer/**.xml
+Data/**.dat.gz
+Data/**.xml
+migration_example_rmarkdown.html
+
