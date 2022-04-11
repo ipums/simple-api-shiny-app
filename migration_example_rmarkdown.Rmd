@@ -10,17 +10,17 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r}
-suppressPackageStartupMessages({
+suppressPackageStartupMessages(suppressWarnings({
   library(ipumsr)
   library(tidyverse)
-})
+}))
 ```
 
 ```{r load-data}
-if (!file.exists("prcs_migration_extract.xml")) {
+if (!file.exists("Data/prcs_migration_extract.xml")) {
   # Load extract definition from JSON
   prcs_migration_extract <- define_extract_from_json(
-    "prcs_migration_extract.json",
+    "Data/prcs_migration_extract.json",
     "usa"
   )
   # Submit, wait for, and download extract
@@ -34,8 +34,8 @@ if (!file.exists("prcs_migration_extract.xml")) {
   file.rename(ddi_filename, "prcs_migration_extract.xml") #<<
   file.rename(data_filename, "prcs_migration_extract.dat.gz") #<<
 }
-ddi <- read_ipums_ddi("prcs_migration_extract.xml")
-data <- read_ipums_micro(ddi, data_file = "prcs_migration_extract.dat.gz")
+ddi <- read_ipums_ddi("Data/prcs_migration_extract.xml")
+data <- read_ipums_micro(ddi, data_file = "Data/prcs_migration_extract.dat.gz")
 ```
 
 ```{r prep-data}
