@@ -47,20 +47,21 @@ if(sum(api_check)>1 | sum (data_check) > 1){
 
 if (!file.exists(file.path(data_path,"prcs_migration_extract.xml"))) {
   # Load extract definition from JSON
-  prcs_migration_extract <- define_extract_from_json(
-    "prcs_migration_extract.json",
+  prcs_migration_extract <- define_extract_from_json(file.path(data_path,"prcs_migration_extract.json"),
     "usa"
   )
   # Submit, wait for, and download extract
   ddi_filename <- submit_extract(prcs_migration_extract) %>% 
     wait_for_extract() %>% 
-    download_extract() %>% 
+    download_extract(download_dir = data_path) %>% 
     basename()
   # Infer data file name from DDI file name
   data_filename <- str_replace(ddi_filename, "\\.xml$", ".dat.gz")
-  # Standardize DDI and data file names #<<
-  file.rename(ddi_filename, "prcs_migration_extract.xml") #<<
-  file.rename(data_filename, "prcs_migration_extract.dat.gz") #<<
+  # Standardize DDI and data file names 
+  file.rename(file.path(data_path,ddi_filename),
+              file.path(data_path, "prcs_migration_extract.xml"))
+  file.rename(file.path(data_path, data_filename),
+              file.path(data_path,"prcs_migration_extract.dat.gz"))
 }
 
 ddi <- read_ipums_ddi(file.path(data_path, "prcs_migration_extract.xml"))
