@@ -75,10 +75,15 @@ data <- read_ipums_micro(
 
 select_choices <- data.frame("Var"= ddi$var_info$var_name)
 
-names(select_choices$Var) <-  ddi$var_info$var_label
-
 select_choices$plot_type <- c("CAT", "HIDE", "HIDE", "HIDE", "COUNT","HIDE", "HIDE", "CAT", "CONT", "CONT", "HIDE","CAT", "HIDE", "HIDE", "HIDE", "HIDE", "CAT", "HIDE", "CAT", "CONT", "DICHOT", "DICHOT", "DICHOT", "DICHOT", "CAT", "HIDE", "CAT", "HIDE", "CAT", "CAT", "HIDE", "CAT", "HIDE", "CONT", "CAT", "HIDE")
 
+
+select_choices$lbl <-  ddi$var_info$var_label
+
+
+select_vec <- select_choices$Var[select_choices$plot_type!="HIDE"]
+
+names(select_vec) <- select_choices$lbl[select_choices$plot_type!="HIDE"]
 
 #### Create empty objects for later
 
@@ -165,7 +170,7 @@ ui <- fluidPage(
             selectInput(
                 "Var",
                 "Select Variable",
-                choices = select_choices$Var[select_choices$plot_type!="HIDE"],
+                choices = select_vec,
                 selected = "AGE"
             ),
             checkboxInput(
@@ -283,7 +288,7 @@ server <- function(input, output) {
   
   
   
-  ##### Capture main table #####
+  # Capture main table #####
   
   #### Generate weighted frequencies
   
@@ -353,8 +358,8 @@ server <- function(input, output) {
     output$main_plot <- renderPlot({
       
       cols <- rainbow(nrow(to_plot()), .6, .9)
-      par("mar" = c(2,1,0,0))
-     layout(matrix(c(1,1,2), ncol =3))
+      par("mar" = c(2,2,0,0))
+     layout(matrix(c(1,1,2,1,1,2), ncol =2))
       
       if(input$Var %in% c("COSTELEC", "HHINCOME", "AGE", "INCTOT")){
         
@@ -375,7 +380,12 @@ server <- function(input, output) {
         )
         par("mar" = c(0,0,0,0))
         plot(1, type = "n", bty = "n", xaxt = "n", yaxt="n", xlab = "", ylab = "")
-        legend("center", legend = rownames(to_plot()), pch = 22, pt.bg = cols, cex = 1.5) 
+        if(length(rownames(to_plot())) >10){
+          nc <- 4
+        } else {
+          nc <- 2
+        }
+        legend("center", legend = rownames(to_plot()), pch = 22, pt.bg = cols, cex = 1.5, ncol = nc) 
       }  
     })
     
