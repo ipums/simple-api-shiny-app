@@ -32,21 +32,11 @@ library(ggplot2)
 ## Set up wait for extract
 
 ## Read in Data
+data_path <- file.path("..","Data")
+data_check <- list.files(data_path) %>% str_detect(".xml")
+extract_path <- list.files(data_path, pattern = ".json")
 
-data_check <- list.files() %>% str_detect(".xml")
-extract_path <- list.files(pattern = ".json")
-
-api_check <- list.files() %>% str_detect(".json")
-
-
-if(sum(api_check)>1 | sum (data_check) > 1){
-  warning("Error: only copy each allowed in shiny folder: extract definitions (.json), ddi (.xml), or data file (.dat.gz)")
-}
-
-data_check <- list.files() %>% str_detect(".xml")
-extract_path <- list.files(pattern = ".json")
-
-api_check <- list.files() %>% str_detect(".json")
+api_check <- list.files(data_path) %>% str_detect(".json")
 
 
 if(sum(api_check)>1 | sum (data_check) > 1){
@@ -55,7 +45,7 @@ if(sum(api_check)>1 | sum (data_check) > 1){
 
 
 
-if (!file.exists("prcs_migration_extract.xml")) {
+if (!file.exists(file.path(data_path,"prcs_migration_extract.xml"))) {
   # Load extract definition from JSON
   prcs_migration_extract <- define_extract_from_json(
     "prcs_migration_extract.json",
@@ -73,10 +63,11 @@ if (!file.exists("prcs_migration_extract.xml")) {
   file.rename(data_filename, "prcs_migration_extract.dat.gz") #<<
 }
 
-ddi <- read_ipums_ddi("prcs_migration_extract.xml")
+ddi <- read_ipums_ddi(file.path(data_path, "prcs_migration_extract.xml"))
+
 data <- read_ipums_micro(
   ddi,
-  data_file = "prcs_migration_extract.dat.gz"
+  data_file = file.path(data_path, "prcs_migration_extract.dat.gz")
 )
 
 
@@ -101,6 +92,8 @@ vals <- NULL
 mig_data <- data
 
 college_regex <- "^[123] year(s)? of college$"
+
+
 mig_data <- mig_data %>% 
   mutate(
     EDUCD3 = EDUCD %>%
@@ -160,8 +153,6 @@ age_to_age_group <- function(x) {
 mig_data <- mig_data %>% 
   mutate(age_group = age_to_age_group(AGE))
 
-
-
 # UI #####
 
 ui <- fluidPage(
@@ -210,7 +201,8 @@ ui <- fluidPage(
           "Migration Ex.",
           tabsetPanel(
             tabPanel("Overall",
-                     plotOutput("mig_plot_all")),
+                     plotOutput("mig_plot_all"),
+                     textOutput("mig_text")),
             tabPanel("By Education",
                      plotOutput("mig_plot_edu")),
             tabPanel("By HH Income",
@@ -411,8 +403,9 @@ server <- function(input, output) {
   output$mig_plot_all <- renderPlot({
     
 
-    # ```{r migration-graph-1, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
+
     mig_data %>% 
+      filter(!is.na(moved_in_last_year)) %>% 
       group_by(YEAR) %>% 
       summarize(
         pct_moved = 100 * sum(PERWT[moved_in_last_year]) / sum(PERWT)
@@ -430,6 +423,7 @@ server <- function(input, output) {
     
   output$mig_plot_edu <- renderPlot({
     mig_data %>% 
+      filter(!is.na(moved_in_last_year)) %>% 
       filter(AGE >= 25) %>%
       group_by(YEAR, EDUCD3) %>% 
       summarize(
@@ -451,6 +445,7 @@ server <- function(input, output) {
     
   output$mig_plot_inc <- renderPlot({
     mig_data %>% 
+      filter(!is.na(moved_in_last_year)) %>% 
       filter(!is.na(hhincome_quintile)) %>% 
       group_by(YEAR, hhincome_quintile) %>% 
       summarize(
@@ -474,6 +469,7 @@ server <- function(input, output) {
    
   renderPlot({
     mig_data %>% 
+      filter(!is.na(moved_in_last_year)) %>% 
       group_by(YEAR, age_group) %>% 
       summarize(
         pct_moved = 100 * sum(PERWT[moved_in_last_year]) / sum(PERWT),
