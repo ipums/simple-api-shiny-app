@@ -1,6 +1,6 @@
 # simple-api-shiny-app
 
-This repository hosts the shiny app demoed for PSU workshop on API. 
+This repository hosts the shiny app demoed for PSU workshop on APIs. 
 
 IPUMS data can not be re-distributed, so this app takes advantage of new API functionality of `ipumsr` to create a portable yet secure way to share and explore data.
  
