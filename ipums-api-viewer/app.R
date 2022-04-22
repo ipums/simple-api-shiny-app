@@ -340,7 +340,8 @@ server <- function(input, output) {
           
         }
       }
-   
+      
+     
       return(out_tab)
 
     })
@@ -367,6 +368,8 @@ server <- function(input, output) {
      layout(matrix(c(1,1,2,1,1,2), ncol =2))
       
       if(input$Var %in% c("COSTELEC", "HHINCOME", "AGE", "INCTOT")){
+        
+        layout(matrix(c(1,1,1,1), ncol =2))
         
 
         
