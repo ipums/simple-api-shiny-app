@@ -97,7 +97,7 @@ vals <- NULL
 
 
 
-#### Migration prep ####
+#### Migration Example prep ####
 
 mig_data <- data
 
@@ -482,7 +482,7 @@ server <- function(input, output) {
     
     ## By age
    
-  renderPlot({
+  output$mig_plot_age <- renderPlot({
     mig_data %>% 
       filter(!is.na(moved_in_last_year)) %>% 
       group_by(YEAR, age_group) %>% 
