@@ -23,6 +23,10 @@ if(!require(stringr)){
 
 ##########
 
+## if trying to work within this script interactively, you must change the directory to the app-folder.
+
+# setwd("ipums-api-viewer")
+
 library(shiny)
 library(ipumsr)
 library(dplyr)
@@ -309,7 +313,7 @@ server <- function(input, output) {
       
       
       
-      #### reformat continues variables ####
+      #### reformat continuous variables ####
       
       if(input$Var %in% c("COSTELEC", "HHINCOME", "AGE", "INCTOT")){
         
