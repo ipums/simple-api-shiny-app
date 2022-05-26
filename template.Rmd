@@ -1,0 +1,182 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+```{r packages}
+
+library(ipumsr)
+library(tidyverse)
+```
+# Setup
+#### First time (ever) setup
+
+This script is intended to semi-automate parts of the IPUMS data acquisition process, using the [microdata API]().  In order to run, users must: 
+1. Have an ipums account registered with one or more of **USA, CPS**
+1. Register for an [IPUMS microdata API key](https://developer.ipums.org/docs/apiprogram/)
+1. Add your API key as an [environmental variable](https://tech.popdata.org/ipumsr/dev/)
+
+#### First time (project) setup
+
+This template makes as few assumptions as possible, yet automates as many steps as possible. 
+
+Fill in the parameters below before proceeding:
+You can create multiple Rmd analysis scripts in the same .Rproj directory that each draw on the same IPUMS extract. If you have multiple extracts in the same subdirectory, these parameters will identify the approritate files.
+
+IPUMS provides unique data names to all extracts by default, but we suggest using descriptive names, eg "prcs_migration", etc. And we reccomend using the same descriptive name for the three key files, eg:
+
+1. prcs_migration_ex.json 
+1. prcs_migration_ex.dat.gz 
+1. prcs_migration_ex.JSON
+
+We recomend storing these three files (and any subsequent extracts relevant to this project) within a sub-folder, `Data`. If you want to store your extract definition, data, and dictionary at the top-project level, you can use `data_dir <- file.path("")`. Or `data_dir <- file.path("..","Data")` if to store your files in a folder at the same level as your `.Rproj`. The `".."` goes "up" one level within a folder system.
+
+Addiotnally, specifiy which IPUMS data collection you will be accessing. With these initial parameters set, we can move on to Creating JSON DEFINITON. If you already have a JSON definition in the folder, the script will proceed to checking and downloading.
+
+**come back to this**
+
+```{r define_proj_names}
+
+data_dir <- file.path("Data")
+
+json_filename <- paste0("prcs_migration_ex",
+                        ".json")
+
+data_rename <- paste0("prcs_migration_ex",
+                        ".dat.gz")
+
+ddi_rename <- paste0("prcs_migration_ex",
+                        ".xml")
+
+collection <- "usa" ## c("usa", "cps")
+
+
+#### do not edit below ####
+
+json_present <- file.exists(file.path(data_dir, json_filename))
+data_present <- file.exists(file.path(data_dir, data_rename)) &
+                   file.exists(file.path(data_dir, ddi_rename))
+
+
+```
+
+### CREATE JSON DEFINITION
+
+There are a few options here.
+
+Build totally from scratch. This requires users to know the IPUMS mnemonics in order to specify variables. Probably only for advanced users or simple definitions. **Skip to next**
+
+```{r, eval = !json_present}
+
+# ## Example values
+# extract_definition <- define_extract_micro(
+#   collection = "usa",
+#   description = "Extract for API vignette",
+#   samples = c("us2018a","us2019a"),
+#   variables = c("AGE","SEX","RACE","STATEFIP"),
+#   data_format = "fixed_width",
+#   data_structure = "rectangular",
+#   rectangular_on = "P"
+# )
+
+extract_definition <- define_extract_micro(
+  collection = "",
+  description = "",
+  samples = c(""),
+  variables = c(""),
+)
+
+if(!extract_definition$collection==""){
+  extract_definition %>% submit_extract()
+  extract_info <- get_extract_info(extract_definition) 
+  extract_info %>%
+    save_extract_as_json(file = file.path(data_dir, json_filename))
+}
+```
+
+Or if you have previously defined an extract using the online system, simply take note of the **extract number** and enter it below. If you know your **most recent** extract is the one you'd like to use, simply leave `extract_num <- ""` as is. 
+
+```{r, eval = !jason_present}
+
+extract_num <- ""
+
+if(is.numeric(extract_num)){
+
+  extract_info <- get_extract_info(c(collection, extract_num)) 
+  extract_info %>% 
+  save_extract_as_json(file = file.path(data_dir,
+                                        json_filename)
+                       )
+} else {
+
+extract_info <- get_last_extract_info(collection)
+
+  extract_info %>%
+    save_extract_as_json(file = file.path(data_dir,
+                                          json_filename)
+                         )
+}
+
+
+```
+
+```{r, eval = jason_present}
+extract_info <- define_extract_from_json(file.path(data_dir, json_filename))
+```
+
+### Submit Extract
+
+If you built your extract using the ipums.org website, your last step to submit the extract. If you built the extract by hand above, the last bit of code submitted the extract to the IPUMS servers.
+
+### Check on Extract
+
+Small extracts will be ready in seconds to minutes, but large requests can take a while.
+
+```{r, eval = !data_present}
+
+is_data_ready <- is_extract_ready(extract_info)
+
+```
+
+### Download Extract
+Now that the JSON is in place, we can check on the data. IPUMS only ensures data will be available for ~7 days, after that point users will need to re-submit an extract request. If your data is out of date, this will re-submit for you.
+
+Once we confirm that the extract is, indeed, ready we download BOTH the data and data dictionary and rename based on the specified values above.
+
+```{r, eval = !data_present}
+if(!is_data_ready){
+  stop("Warning: extract not ready. Please re-run the above code-chunk to re check")
+} 
+
+ddi_filename <- extract_info %>%
+  download_extract(download_dir = data_path) %>% 
+    basename()
+  # Infer data file name from DDI file name
+  data_filename <- str_replace(ddi_filename, "\\.xml$", ".dat.gz")
+  # Standardize DDI and data file names 
+  file.rename(file.path(data_path, ddi_filename),
+              file.path(data_path, ddi_rename))
+  file.rename(file.path(data_path, data_filename),
+              file.path(data_path, data_rename))
+
+```
+
+### Load Data
+
+Now we're ready to begin analysis, and your project will be shareable/reproducible for other IPUMS users.
+
+```{r}
+
+
+ddi <- read_ipums_ddi(file.path(data_dir, ddi_rename))
+data <- read_ipums_micro(ddi, data_file = file.path(data_dir, data_rename))
+
+```
+
+# Analysis Awaits
