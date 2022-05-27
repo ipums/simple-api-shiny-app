@@ -4,5 +4,6 @@
 .Ruserdata
 Data/**.dat.gz
 Data/**.xml
+Data/**.csv
 migration_example_rmarkdown.html
 
