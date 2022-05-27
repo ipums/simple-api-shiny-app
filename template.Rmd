@@ -33,6 +33,12 @@ This script is intended to semi-automate parts of the IPUMS data acquisition pro
 Some Notes on this file:
 This script uses `{.tabset}`s in an attempt to keep the back-end setup and user-facing analysis separate, more organized, and hopefully easier to work with. This script also uses code-folding to keep the knitted HTML report neat.
 
+This script is set up with the intention of being shared via github, but you **should not** include the `.dat.gz` or `.xml` files in the git repo. Consider adding the following, or similar, to `.gitignore`: 
+"Data/**.dat.gz",
+"Data/**.xml", 
+"Data/**.csv"
+
+
 ## Setup - Project Parameters
 
 This template makes as few assumptions as possible, yet automates as many steps as possible. Specify a few project parameters, and this script will check on, submit, and download data straight to your specified directory. Once compiled, only the script itself and the `.json` file are needed to share/reproduce the work in this script. There are 4 **key parameters** the user must define in the code chunk below, with additional details following the parameter chunk.
