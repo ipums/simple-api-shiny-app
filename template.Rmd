@@ -1,83 +1,67 @@
 ---
-title: "Untitled"
-output: html_document
+title: "Reproducible Research"
+output: 
+  html_document:
+    code_folding: hide
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
 
-```{r packages}
+```{r packages, echo=FALSE}
 suppressPackageStartupMessages(suppressWarnings({
   library(ipumsr)
   library(tidyverse)
 }))
 
 ```
-# Setup
-#### First time (ever) setup
+
+
+# {.tabset}
+
+## Setup - First Time
 
 This script is intended to semi-automate parts of the IPUMS data acquisition process, using the [microdata API]().  In order to run, users must: 
 1. Have an ipums account registered with one or more of **USA, CPS**
 1. Register for an [IPUMS microdata API key](https://developer.ipums.org/docs/apiprogram/)
 1. Add your API key as an [environmental variable](https://tech.popdata.org/ipumsr/dev/)
 
-#### First time (project) setup
 
-This template makes as few assumptions as possible, yet automates as many steps as possible. 
+Some Notes on this file:
+This script uses `{.tabset}`s in an attempt to keep the back-end setup and user-facing analysis separate, more organized, and hopefully easier to work with. This script also uses code-folding to keep the knitted HTML report neat.
 
-Fill in the parameters below before proceeding:
-You can create multiple Rmd analysis scripts in the same .Rproj directory that each draw on the same IPUMS extract. If you have multiple extracts in the same subdirectory, these parameters will identify the approritate files.
+## Setup - Project Parameters
 
-IPUMS provides unique data names to all extracts by default, but we suggest using descriptive names, eg "prcs_migration", etc. And we reccomend using the same descriptive name for the three key files, eg:
+This template makes as few assumptions as possible, yet automates as many steps as possible. Specify a few project parameters, and this script will check on, submit, and download data straight to your specified directory. Once compiled, only the script itself and the `.json` file are needed to share/reproduce the work in this script. There are 4 **key parameters** the user must define in the code chunk below, with additional details following the parameter chunk.
 
-1. prcs_migration_ex.json 
-1. prcs_migration_ex.dat.gz 
-1. prcs_migration_ex.JSON
+Once these parameters are specified, Run/Knit this script the first time - It will most likely "fail" and inform you the data is not ready. However, you should now see {r json_filename} in the `data_dir`. (if it wasn't there already). Smaller extracts may be ready in just a few minutes, but extracts with many variables/samples may take longer. Simply re-run/knit this script to check on the extract and, once ready, download straight to your specified directory.
 
-We recomend storing these three files (and any subsequent extracts relevant to this project) within a sub-folder, `Data`. If you want to store your extract definition, data, and dictionary at the top-project level, you can use `data_dir <- file.path("")`. Or `data_dir <- file.path("..","Data")` if to store your files in a folder at the same level as your `.Rproj`. The `".."` goes "up" one level within a folder system.
+```{r project_paramaters}
 
-Addiotnally, specifiy which IPUMS data collection you will be accessing. With these initial parameters set, we can move on to Creating JSON DEFINITON. If you already have a JSON definition in the folder, the script will proceed to checking and downloading.
+#### Key Parameters #####
 
-**come back to this**
-
-```{r define_proj_names}
+collection <- "" ## c("usa", "cps")
 
 data_dir <- file.path("Data")
 
-json_filename <- paste0("prcs_migration_ex",
-                        ".json")
+descriptive_name <- ""
 
-data_rename <- paste0("prcs_migration_ex",
-                        ".dat.gz")
+extract_num <- ""
 
-ddi_rename <- paste0("prcs_migration_ex",
-                        ".xml")
+#### Creating Data Extract 'By Hand' ####
 
-collection <- "usa" ## c("usa", "cps")
+## DO NOT EDIT IF YOU CREATED/SUBMITTED EXTRACT ONLINE ##
 
+extract_definition <- define_extract_micro(
+  collection = "",
+  description = "",
+  samples = c(""),
+  variables = c(""),
+)
 
-#### do not edit below ####
-
-json_present <- file.exists(file.path(data_dir, json_filename))
-data_present <- file.exists(file.path(data_dir, data_rename)) &
-                   file.exists(file.path(data_dir, ddi_rename))
-submitted <- file.exists(file.path(data_dir, "chk_submitted.txt"))
-if(submitted){
-submitted_num <- read.csv(file.path(data_dir, "chk_submitted.txt"))[[1]]
-}
-
-```
-
-### CREATE JSON DEFINITION
-
-There are a few options here.
-
-Build totally from scratch. This requires users to know the IPUMS mnemonics in order to specify variables. Probably only for advanced users or simple definitions. **Skip to next**
-
-```{r, eval = !json_present}
 
 # ## Example values
 # extract_definition <- define_extract_micro(
@@ -90,22 +74,84 @@ Build totally from scratch. This requires users to know the IPUMS mnemonics in o
 #   rectangular_on = "P"
 # )
 
-extract_definition <- define_extract_micro(
-  collection = "",
-  description = "",
-  samples = c(""),
-  variables = c(""),
-)
 
 ```
 
-Or if you have previously defined an extract using the online system, simply take note of the **extract number** and enter it below. If you know your **most recent** extract is the one you'd like to use, simply leave `extract_num <- ""` as is. 
+### Parameter Definitions
+
+**collection** The IPUMS data collection to query, abbreviated and lower-case. Currently only USA and CPS are supported, ie: "usa", "cps"
+
+**data_dir** Where to download your data (will be created if it does not exist). We recommend storing data, dictionaries, and extract definitions within a sub-folder. The default will create a sub-folder named "Data." within your R project. 
+* If you want to store your files at the **top-level** of the project directory use: 
+  + `data_dir <- file.path("")`.
+* If you want to store your files **outside** of the project directory use:
+  + `data_dir <- file.path("..","Data")` to store in a sibling-directory to the project directory.
+  + The `".."` goes "up" one level within a folder system.
+
+**descriptive_name** IPUMS provides numerical IDs for each data extract by default (eg, `usa_000001.dat.gz, usa_000001.xml`), however these are specific to individual users and can be confusing to keep track of. We recommend users relabel their extracts using a project- or analysis-specific descriptive name, eg: "prcs_migration_ex". The script will automatically apply the same `descriptive_name` to the `.json, .dat.gz, .xml`, as well as a `.csv` file used for checking extract status.
+
+**extract_num** The last step is indicate an extract definition. While the microdata API allows users to build extracts 'by hand' via coding, it also requires users to know the IPUMS mnemonics in order to specify variables, samples, etc. **Most users** will probably still build (and submit) their extract definitions online via the Data Cart GUI on [ipums.org](www.ipums.org). 
+* To work with a **past extract**
+  + Take note of the **Extract Number** on your [Download or Revise Data page](https://usa.ipums.org/usa-action/data_requests/download).
+  + Modify `extract_num` 
+  + Run/Knit Script
+  
+* To work with your **most recent extract**.
+  + Leave `extract_num <- ""` as is
+  + Run/Knit Script
+
+* To build an extract **by hand**
+  + Leave `extract_num <- ""` as is
+  + Modify `extract_definition` as needed
+  + Run/Knit Script
+  
+* If you **already have a .json extract definition**
+  + Manually add it to the `data_dir` folder
+  + Run/Knit Script
+  
+
+From here, you can skip ahead to [Analysis Awaits].
+
+#### Initial setup
+
+```{r}
+
+if(!data_dir==""){
+if(!dir.exists(data_dir)){
+  dir.create(data_dir)
+}
+}
+
+if(collection==""){
+  stop("Please specify a collection, one of c('usa', 'cps')")
+}
+
+if(descriptive_name==""){
+  stop("Please specify a descriptive name for files")
+}
+
+json_filename <- paste0(descriptive_name,".json")
+data_rename <- paste0(descriptive_name,".dat.gz")
+ddi_rename <- paste0(descriptive_name,".xml")
+chk_name <- paste0("chk_",descriptive_name,".csv")
+
+json_present <- file.exists(file.path(data_dir, json_filename))
+data_present <- file.exists(file.path(data_dir, data_rename)) &
+                   file.exists(file.path(data_dir, ddi_rename))
+
+submitted <- file.exists(file.path(data_dir, chk_name))
+
+if(submitted){
+submitted_num <- read.csv(file.path(data_dir, chk_name))[[1]]
+}
+
+```
+
+
+The following handles the various sources of extract definitions, depending on input decisions, creating `extract_info`, which will be used to actually do the checking/downloading.
 
 ```{r, eval = !json_present}
 
-extract_num <- ""
-
-###################################
 
 if(is.numeric(extract_num)){
 
@@ -132,24 +178,25 @@ extract_info <- get_last_extract_info(collection)
 
 ```
 
+If the json was already present, we skip the above and just read the extract using `ipumsr` functions. 
 ```{r, eval = json_present}
 extract_info <- define_extract_from_json(file.path(data_dir, json_filename), collection)
 ```
 
 ### Submit and Check on Extract
 
-If you built your extract using the ipums.org website you submitted your data request already.  your last step to submit the extract and you If you built the extract by hand above, the last bit of code submitted the extract to the IPUMS servers. If this script submits an extract, it adds an empty text file to the data folder as a flag to prevent submitting multiple copies of the same extract.
+If you built your extract using the ipums.org website you have already submitted your data request. If you built the extract by hand, or your data have expired, the script will resubmit the extract to the IPUMS servers. If this script initiates a submit, it also adds an file to the `data_dir` folder as a flag to prevent submitting multiple copies of the same extract.
 
 ```{r, eval = (!data_present) & (!submitted)}
 
 extract_info <- extract_info %>% submit_extract()
-write.csv(extract_info$number, file.path(data_dir, "chk_submitted.txt"), row.names = F)
+write.csv(extract_info$number, file.path(data_dir, chk_name), row.names = F)
 
 ```
 
 
-Small extracts will be ready in seconds to minutes, but large requests can take a while.
 
+Extract number is needed, but user-specific. If a user did not specify an explicit number, this will read it from the submission.
 
 ```{r eval = !data_present}
 
@@ -169,7 +216,7 @@ Once we confirm that the extract is, indeed, ready we download BOTH the data and
 
 ```{r, eval = !data_present}
 if(!is_data_ready){
-  stop("Note: extract not ready. Please wait a few mins and re-run file.",call. = F)
+  stop("Extract not ready. Please wait a few mins and re-run file.",call. = F)
 } 
 
 ddi_filename <- extract_info %>%
@@ -197,4 +244,8 @@ data <- read_ipums_micro(ddi, data_file = file.path(data_dir, data_rename))
 
 ```
 
-# Analysis Awaits
+
+
+## Analysis Awaits {.active}
+
+Begin exploring and visualizng your data!
