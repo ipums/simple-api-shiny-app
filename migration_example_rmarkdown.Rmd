@@ -14,9 +14,11 @@ suppressPackageStartupMessages(suppressWarnings({
   library(ipumsr)
   library(tidyverse)
 }))
+
+data_path <- file.path("Data")  
 ```
 
-```{r load-data}
+```{r load-data, echo=FALSE}
 if (!file.exists("Data/prcs_migration_extract.xml")) {
   # Load extract definition from JSON
   prcs_migration_extract <- define_extract_from_json(
@@ -26,13 +28,15 @@ if (!file.exists("Data/prcs_migration_extract.xml")) {
   # Submit, wait for, and download extract
   ddi_filename <- submit_extract(prcs_migration_extract) %>% 
     wait_for_extract() %>% 
-    download_extract() %>% 
+    download_extract(download_dir = data_path) %>% 
     basename()
   # Infer data file name from DDI file name
   data_filename <- str_replace(ddi_filename, "\\.xml$", ".dat.gz")
-  # Standardize DDI and data file names #<<
-  file.rename(ddi_filename, "prcs_migration_extract.xml") #<<
-  file.rename(data_filename, "prcs_migration_extract.dat.gz") #<<
+  # Standardize DDI and data file names 
+  file.rename(file.path(data_path, ddi_filename),
+              file.path(data_path, "prcs_migration_extract.xml"))
+  file.rename(file.path(data_path, data_filename),
+              file.path(data_path,"prcs_migration_extract.dat.gz"))
 }
 ddi <- read_ipums_ddi("Data/prcs_migration_extract.xml")
 data <- read_ipums_micro(ddi, data_file = "Data/prcs_migration_extract.dat.gz")
@@ -193,4 +197,63 @@ data %>%
       x = NULL,
       y = "%"
     )
+```
+
+
+## Setup Code
+
+The code below defines the steps of checking for IPUMS data within within the specified `Data` subfolder. If the appropriate `.dat.gz, .xml` files **do not** exist, it triggers code to:
+* CREATE a [data extract]() from the included JSON definition. 
+* SUBMIT the extract to IPUMS data servers.
+* WAIT and periodically check on status of data extract, when ready...
+* DOWNLOAD `data` and `data dictionary` to specific directory.
+* RENAME files from `usa_000030.xml, usa_000030.dat.gz` to an explicit file name.
+* READ IN both `data` and `data dictionary` to current session.
+
+If the file is re-run at a later date, the `.dat.gz` and `.xml` data files will be detected skipping ahead to simply loading these files into R as `data` and `ddi`, respectively. Starting your 
+From here, we can 
+
+```{r setup_code, eval = FALSE}
+
+
+  library(ipumsr)
+  library(tidyverse)
+
+
+## extract definition
+
+## IF the 
+json_filename <- "prcs_migration_extract.json"
+data_rename <- "prcs_migration_extract.dat.gz"
+ddi_rename <- "prcs_migtation_extract.xml" 
+
+collection <- "usa" ## c("usa", "cps")
+## maybe include a WAIT_NOW parameter
+
+data_path <- file.path("Data")  ## Specify a sub-directory or filepath
+
+if (!(file.exists(file.path(data_path, data_filename)) & 
+      file.exists(file.path(data_path, dict_filename)))) {
+  # Load extract definition from JSON
+  extract_definition <- define_extract_from_json(
+    file.path(data_path, dict_filename),
+    collection
+  )
+  # Submit, wait for, and download extract
+  ddi_filename <- submit_extract(extract_definition) %>% 
+    wait_for_extract() %>% 
+    download_extract(download_dir = data_path) %>% 
+    basename()
+  # Infer data file name from DDI file name
+  data_filename <- str_replace(ddi_filename, "\\.xml$", ".dat.gz")
+  # Standardize DDI and data file names 
+  file.rename(file.path(data_path, ddi_filename),
+              file.path(data_path, "prcs_migration_extract.xml"))
+  file.rename(file.path(data_path, data_filename),
+              file.path(data_path,"prcs_migration_extract.dat.gz"))
+}
+
+ddi <- read_ipums_ddi("Data/prcs_migration_extract.xml")
+data <- read_ipums_micro(ddi, data_file = "Data/prcs_migration_extract.dat.gz")
+
 ```
