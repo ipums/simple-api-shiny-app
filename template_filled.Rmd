@@ -7,7 +7,10 @@ output:
 
 ```{r setup, include=FALSE, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
+knitr::opts_chunk$set(dpi = 18)
+knitr::opts_chunk$set(fig.retina = 1)
+knitr::opts_chunk$set(out.width = "50%")
+knitr::opts_chunk$set(out.height = "50%")
 ```
 
 
