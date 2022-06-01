@@ -1,5 +1,18 @@
 
 
+# TO DO #####
+
+## tabset
+## single var: 
+#### siberbar: paramaeters
+#### main: boxplot/barplot over time
+####      weighted freq tables
+## two vars:
+#### if both cat, chi sq
+#### if both cont, cor
+
+##
+
 ## required to install from github
 if(!require(remotes)){
   install.packages("remotes")
@@ -43,15 +56,15 @@ extract_path <- list.files(data_path, pattern = ".json")
 api_check <- list.files(data_path) %>% str_detect(".json")
 
 
-if(sum(api_check)>1 | sum (data_check) > 1){
+if(sum(api_check)>1 | sum(data_check) > 1){
   warning("Error: only copy each allowed in shiny folder: extract definitions (.json), ddi (.xml), or data file (.dat.gz)")
 }
 
 
 
-if (!file.exists(file.path(data_path,"prcs_migration_extract.xml"))) {
+if (!file.exists(file.path(data_path,"prcs_migration_ex.xml"))) {
   # Load extract definition from JSON
-  prcs_migration_extract <- define_extract_from_json(file.path(data_path,"prcs_migration_extract.json"),
+  prcs_migration_extract <- define_extract_from_json(file.path(data_path,"prcs_migration_ex.json"),
     "usa"
   )
   # Submit, wait for, and download extract
@@ -63,24 +76,48 @@ if (!file.exists(file.path(data_path,"prcs_migration_extract.xml"))) {
   data_filename <- str_replace(ddi_filename, "\\.xml$", ".dat.gz")
   # Standardize DDI and data file names 
   file.rename(file.path(data_path,ddi_filename),
-              file.path(data_path, "prcs_migration_extract.xml"))
+              file.path(data_path, "prcs_migration_ex.xml"))
   file.rename(file.path(data_path, data_filename),
-              file.path(data_path,"prcs_migration_extract.dat.gz"))
+              file.path(data_path,"prcs_migration_ex.dat.gz"))
 }
 
-ddi <- read_ipums_ddi(file.path(data_path, "prcs_migration_extract.xml"))
+ddi <- read_ipums_ddi(file.path(data_path, "prcs_migration_ex.xml"))
 
 data <- read_ipums_micro(
   ddi,
-  data_file = file.path(data_path, "prcs_migration_extract.dat.gz")
+  data_file = file.path(data_path, "prcs_migration_ex.dat.gz")
 )
 
 
 #### Initital Prep ####
 
 select_choices <- data.frame("Var"= ddi$var_info$var_name)
+select_choices$plot_type <- character(nrow(select_choices))
+n_vals <- apply(data,2,function(x){
+  length(unique(x))
+})
 
-select_choices$plot_type <- c("CAT", "HIDE", "HIDE", "HIDE", "COUNT","HIDE", "HIDE", "CAT", "CONT", "CONT", "HIDE","CAT", "HIDE", "HIDE", "HIDE", "HIDE", "CAT", "HIDE", "CAT", "CONT", "DICHOT", "DICHOT", "DICHOT", "DICHOT", "CAT", "HIDE", "CAT", "HIDE", "CAT", "CAT", "HIDE", "CAT", "HIDE", "CONT", "CAT", "HIDE")
+select_choices %>% mutate(plot_type = case_when(n_vals < 60 ~ "CAT",
+                                                n_vals > 61 ~ "CONT"))
+# 
+# for( i in seq_along(ddi$var_info$var_name)){
+#   vv <- ddi$var_info[i,]
+#   max_l <- length(seq(from=vv$start,
+#                       to = vv$end))
+#   
+#   vals <- vv$val_labels[[1]]
+#   
+#   nrow(vals) < 25 & nrow(vals) != 0
+#   
+#   if(max_l > 25){
+#     select_choices$plot_type[i] <- "HIDE"
+#   } else if (length(vals$val) < 25){
+#     select_choices$plot_type[i] <- "CAT"
+#   } 
+#   
+# }
+
+# select_choices$plot_type <- c("CAT", "HIDE", "HIDE", "HIDE", "COUNT","HIDE", "HIDE", "CAT", "CONT", "CONT", "HIDE","CAT", "HIDE", "HIDE", "HIDE", "HIDE", "CAT", "HIDE", "CAT", "CONT", "DICHOT", "DICHOT", "DICHOT", "DICHOT", "CAT", "HIDE", "CAT", "HIDE", "CAT", "CAT", "HIDE", "CAT", "HIDE", "CONT", "CAT", "HIDE")
 
 
 select_choices$lbl <-  ddi$var_info$var_label
@@ -508,3 +545,4 @@ server <- function(input, output) {
 
 # Run the application
 shinyApp(ui = ui, server = server)
+
