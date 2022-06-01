@@ -184,8 +184,8 @@ pre code {
 </div>
 
 
-<div id="section" class="section level1 tabset">
-<h1 class="tabset"></h1>
+<div id="tabset" class="section level1">
+<h1>tabset</h1>
 <div id="setup---first-time" class="section level2">
 <h2>Setup - First Time</h2>
 <p>This script is intended to semi-automate parts of the IPUMS data acquisition process, using the <a href>microdata API</a>. In order to run, users must: 1. Have an ipums account registered with one or more of <strong>USA, CPS</strong> 1. Register for an <a href="https://developer.ipums.org/docs/apiprogram/">IPUMS microdata API key</a> 1. Add your API key as an <a href="https://tech.popdata.org/ipumsr/dev/">environmental variable</a></p>
@@ -252,7 +252,7 @@ extract_definition &lt;- define_extract_micro(
 <li>Run/Knit Script</li>
 </ul></li>
 </ul>
-<p>From here, you can skip ahead to <a href="#analysis-awaits">Analysis Awaits</a>.</p>
+<p>From here, you can skip ahead to [Analysis Awaits].</p>
 <div id="initial-setup" class="section level4">
 <h4>Initial setup</h4>
 <pre class="r"><code>if(!data_dir==&quot;&quot;){
@@ -349,8 +349,8 @@ data &lt;- read_ipums_micro(ddi, data_file = file.path(data_dir, data_rename))</
 ## cite the data appropriately. Use command `ipums_conditions()` for more details.</code></pre>
 </div>
 </div>
-<div id="analysis-awaits" class="section level2 active">
-<h2 class="active">Analysis Awaits</h2>
+<div id="analysis-awaits-active" class="section level2">
+<h2>Analysis Awaits active</h2>
 <p>Begin exploring and visualizng your data!</p>
 <pre class="r"><code># Prep education variable
 college_regex &lt;- &quot;^[123] year(s)? of college$&quot;
@@ -412,8 +412,8 @@ age_to_age_group &lt;- function(x) {
 
 data &lt;- data %&gt;% 
   mutate(age_group = age_to_age_group(AGE))</code></pre>
-<div id="migration-2015-2019" class="section level3 tabset">
-<h3 class="tabset">Migration 2015-2019</h3>
+<div id="migration-2015-2019-tabset" class="section level3">
+<h3>Migration 2015-2019 tabset</h3>
 <p>The percentage of people who had moved in the last year increased between 2017 and 2018 from about 6% to over 8% among all persons in Puerto Rico, but the magnitude of this trend varies by education, household income, and age.</p>
 <p>Note: These graphs show trends in point estimates from sample data, without displaying estimates of sampling error. Differences over time or across groups may not be statistically significant. To calculate confidence intervals for point estimates, follow the <a href="https://usa.ipums.org/usa/repwt.shtml">IPUMS USA instructions for using replicate weights</a>.</p>
 <div id="overall" class="section level4">

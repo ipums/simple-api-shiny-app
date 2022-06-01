@@ -21,7 +21,7 @@ suppressPackageStartupMessages(suppressWarnings({
 ```
 
 
-# {.tabset}
+# tabset
 
 ## Setup - First Time
 
@@ -253,7 +253,7 @@ data <- read_ipums_micro(ddi, data_file = file.path(data_dir, data_rename))
 
 
 
-## Analysis Awaits {.active}
+## Analysis Awaits active
 
 Begin exploring and visualizng your data!
 
@@ -320,7 +320,7 @@ data <- data %>%
   mutate(age_group = age_to_age_group(AGE))
 ```
 
-### Migration 2015-2019 {.tabset}
+### Migration 2015-2019 tabset
 
 The percentage of people who had moved in the last year increased between 2017 
 and 2018 from about 6% to over 8% among all persons in Puerto Rico, but the 
