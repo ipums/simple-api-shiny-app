@@ -6,11 +6,9 @@ output:
 ---
 
 ```{r setup, include=FALSE, echo = FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(dpi = 18)
-knitr::opts_chunk$set(fig.retina = 1)
-knitr::opts_chunk$set(out.width = "50%")
-knitr::opts_chunk$set(out.height = "50%")
+knitr::opts_chunk$set(echo = TRUE,
+                      dpi = 72,
+                      fig.retina = 1)
 ```
 
 
@@ -336,7 +334,7 @@ point estimates, follow the
 
 #### Overall
 
-```{r migration-graph-1, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
+```{r migration-graph-1, echo = FALSE}
 data %>% 
   filter(!is.na(moved_in_last_year)) %>% 
   group_by(YEAR) %>% 
@@ -354,7 +352,7 @@ data %>%
 
 #### By education
 
-```{r migration-graph-2, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
+```{r migration-graph-2, echo = FALSE}
 data %>% 
   filter(!is.na(moved_in_last_year)) %>% 
   filter(AGE >= 25) %>%
@@ -376,7 +374,7 @@ data %>%
 
 #### By household income
 
-```{r migration-graph-3, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
+```{r migration-graph-3, echo = FALSE}
 data %>% 
   filter(!is.na(moved_in_last_year)) %>% 
   filter(!is.na(hhincome_quintile)) %>% 
@@ -398,7 +396,7 @@ data %>%
 
 #### By age
 
-```{r migration-graph-4, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
+```{r migration-graph-4, echo = FALSE}
 data %>% 
   filter(!is.na(moved_in_last_year)) %>% 
   group_by(YEAR, age_group) %>% 
