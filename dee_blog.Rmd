@@ -1,0 +1,273 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# TO-DO
+
+* read through template, filled, and blog post side by side
+  + consistent function names
+  + everything runs smoothly
+* add template to ipumsr **branch**
+* make screenshots of running template
+    + template should be added to ipumsr **before screenshots**
+    
+* check over and link approrpriate blog posts
+* double check all links
+* modify puerto rico extract to include more targeted variables
+* check all links within migration .Rmd
+
+
+
+# Reproducibility with ipumsr + API
+
+Have you ever wanted to share a project using IPUMS data with a colleage and remembered **remembered**, [I can't redistribute my ipums data :(](blog.popdata.org).  
+
+Maybe you'd like a colleague to replicate your findings, or **some kind of teaching example**. In the past, if you wanted to someone to use the same data you would need to provide a list of variables and instructions to click through the Data Cart GUI. 
+
+**but wait there's more**
+
+The [new ipums microdata API](blog.popdata.org) makes it easier than ever to share your [extract definitions](blog.popdata.org) with fellow IPUMS users. Using the **microdata API**, you can:
+* Record your extract definition as a .json file. These files are:
+  + Easy to revise
+  + Easy to share
+* Submit your extract to IPUMS servers
+  + No need to click a single button on the website (unless you want to use the website)
+* Download data **and** meta data directly into a project directory
+  + This feature is a personal favorite
+  
+
+The latest versions of [ipumsr](https://tech.popdata.org/ipumsr/dev/)/[ipumspy]() contains brand new functions allowing users to call on the IPUMS microdata API directly from their R/Rstudio.* Check out our [other posts]() about [getting an API key]() and [something else](), for more info on [a relevant point](). 
+
+We've bundled several of these functions together into an template in the ipumsr package, the [.Rmd for reproducible research (RRR)](https://github.com/ipums/simple-api-shiny-app/filled_template.html). This template automates many of the above steps, needing only 4 parameters from the user. Read on to learn more about the **new ipumsr API functions** and how we put them together to facilitate data sharing and reproducible research. As a bonus, we've also included a simple Shiny App: the [Variable Variation Value Viewer (VVVV)](https://github.com/ipums/simple-api-shiny-app/VVVV). 
+
+* **Note:** The app is not inteded to be a "one size fits all" viewer for ipums data (though it *should* work for any combination of variables/samples in IPUMS USA). Rather, we hope this can help make shiny development more accessible and encourage new and exciting uses of IPUMS data. Note that this is not a live app, but one that can be compiled to run locally. 
+
+The key feature to both the `RRR` and `VVVV` is that they **do not** contain any **data** or **metadata**. 
+
+**wait, what**
+
+Instead, they use the `.json extract definition` to create and submit a **new data extract** the first time the script is run. By sharing as few as two files, you can allow a colleague, student, or family member to download the exact same IPUMS data you used in order to replicate or further explore your work. We hope this helps make research more accessible and repeatable. Read on to see the RRR in action, as we explore some data from IPUMS USA, the [Puerto Rican Community Survey](https://usa.ipums.org/usa/sampdesc.shtml#us2019b).
+
+**hold on to your butts**
+
+The basic assumption of the template is that:
+
+1. You have registered with with IPUMS USA (or IPUMS CPS)
+1. You have registered for your own unique a [microdate API key](**link about registering**) and [added it to your .Renviron](**link to derek post?**)
+1. You have a specific dataset you want to download, analyze, and visualize **and** 
+1. You would like to let other (IPUMS users) replicate the work.
+
+The first step in this workflow is to create a `data extract`. IPUMS users will be familiar with using the project-specific Data Cart GUI on ipums.org to create their extracts. While it is possible to create extracts entirely within R (more on that below), many users (this author included) find it helpful to use the website to create and ubmit their extracts, then begin working with the `RRR` as follows.
+# Pass the Parameters
+
+**passing dinner gif?**
+
+The template makes as few assumptions as possible, yet automates as many steps as possible. Upon opening the template, users will be prompted for 4 key parameters. With these in place,the script will check on, submit, and download data straight to your specified directory. Once compiled, only the script itself and the `.json` file are needed to share/reproduce the work in this script - or you could provide the interactive .html report. 
+
+**maybe use a screenshot instead**
+
+**2, 1 empty, 1 filled**
+
+```{r, echo = FALSE}
+
+## screenshots
+
+```
+
+To go over these parameters in a little more detail:
+
+* `collection` The IPUMS data collection to query, abbreviated and lower-case. Currently only USA and CPS are supported, and should be specified in **lowercase abbreviations:** 
+  + "usa", "cps"
+
+* `data_dir` Where to download your data (will be created if it does not exist). We recommend storing data, dictionaries, and extract definitions in a sub-folder of your R project. The default will create a "Data." folder within. 
+* If you want to store your files at the **top-level** of the project directory use: 
+  + `data_dir <- file.path("")`.
+* If you want to store your files **outside** of the project directory use:
+  + `data_dir <- file.path("..","Data")` to store in a sibling-directory to the project directory.
+  + The `".."` goes "up" one level within a folder system.
+
+`descriptive_name` IPUMS provides numerical IDs for each data extract by default (eg, `usa_000001.dat.gz, usa_000001.xml`), however these are specific to individual users and can be confusing to keep track of. We recommend users relabel their extracts using a project- or analysis-specific descriptive name, eg: "prcs_migration_ex". The script will automatically apply the same `descriptive_name` to the `.json, .dat.gz, .xml`, as well as a `.csv` file used for checking extract status.
+
+**extract_num** The last step is to indicate an extract definition. If you've already created an extract online, via the Data Cart GUI, or someone has shared a .json extract definition with you, follow one of the following options. 
+* To work with a **past extract**
+  + Take note of the **Extract Number** on your [Download or Revise Data page](https://usa.ipums.org/usa-action/data_requests/download).
+  + Modify `extract_num <- 42`
+  + **screenshot of where this is/looks like**
+
+* To work with your **most recent extract**.
+  + Leave `extract_num <- ""` as is
+  
+* If you **already have a .json extract definition**
+  + Manually add it to the `data_dir` folder
+
+The microdata API **does** allow users to build extracts 'by hand' using the `define_extract_micro()` function. Users can specify arugments for this in the parameters of the `RRR` template. If you would like to do so, leave `extract_num <-""` as in, and modify `extract_definition` as needed. It should be noted that big extracts could quickly become unwieldy to type out, and this approach require users to know the IPUMS mnemonics in order to specify variables, samples, etc. In practice, it might be easier to build your extract online, until you become more familiar with the shorthand. Hard coding an extract definition takes just 4 arguments to `define_extract_mictro()`.
+
+**again, screenshots**
+  
+```{r, echo=TRUE, eval=FALSE}
+  
+extract_definition <- define_extract_micro(
+  collection = "usa",
+  description = "Extract for .Rmd API template",
+  samples = c("us2019b","us2018b","us2017b","us2016b","us2015b"),
+  variables = c("AGE","SEX","RACE","HISPAN","SPEAKENG", "EDUC", "EMPSTAT", "INCTOT", "MIGRATE1", "HHINCOME","COSTELEC","CINETH", "CPI99")
+)
+
+```
+
+From here, the `RRR` is ready to go! It is set up to generate an (interactive) .HTML report. All we have to do is click the knit button, or run `rmarkdown::render()`. and away it goes....
+
+
+**knit button** | code, 
+
+...wait is that an error???
+
+**gimli gif** - that was deliberate
+
+Don't worry! It takes time for the ipums servers to process the data extracts, query the IPUMS repository for your samples and variables, and compile the resulting files. Running the template the first time will submit your data and add a "flag" file to ensure you don't resubmit while you're waiting for your data to be prepared.
+
+Re-running the script **WILL** check on the status of your extract and, once ready, download it directly to the `data_dir` specified. That's right, your **data** and **metadata** will be downloaded, together, in one step. No more "left click download button, right click and 'save target as...' on the DDI link, manually copy/paste both files into project dir"
+
+**before/after file download pics**
+
+In fact, if you know which extract you'd like to download (and you know it's ready you can download your data **and** metadata in a **single line.** The following would download *my* 42nd data extract from IPUMS USA - assuming the extract is ready to go - directly to my working drive.(*personally, I think this is the most handy single feature of the API*).
+
+```{r}
+ipumsr::download_extract(c("usa", 42))
+```
+
+**appluase gif**
+
+So after what has felt like an eternity, but was actually probably just a few minutes of waiting, we re-knit the script to download and load the data.
+
+**Screenshot of knit**
+
+**sreenshot of data folder**
+
+Once your data/metadata files are populated you're ready to go with analysis! 
+
+
+**screenshot of analysis awaits**
+  with text
+  as rendered
+  
+
+With your analysis in place, it's time to compile the final report. So just re-knit!
+
+**really?**
+
+As long as the `.dat.gz` and `.xml` files are present, the script **will not** submit, or download new data. It will proceed with compiling the HTML output. In order to **SHARE YOUR BEAUTIFUL WORK**, you can send the `.Rmd` file and the accompanying `.json` file (in the appropriate `data_dir`). When colleagues run it the script will:
+
+1. First time, Warn user to wait and try again in a few mins
+1. Download and rename data, proceed with analysis, generate and open polished html report!
+
+That's it! In just 2 clicks of Rstudio, you can have a polished report - that users can exand upon. All the code is in place for them to add further analysis, or visualize data in new ways. 
+
+For teachers, your code can serve as an example that students could replicate on other samples or variables. In fact, it's easy to modify an existing `.json` defintion with:
+
+```{r}
+
+## load extract
+## modify extract
+## save new extract
+
+```
+
+
+With the new extract, open a new `.RRR` template and begin the process again - or copy over whatever relevant work there is!
+
+**NOTE:** Feel free to delete any **text** in the `.RRR template`, but leave the **code** in place to ensure the automated steps function properly! 
+
+
+
+
+
+
+
+# VVVV
+
+Do I have time for this ???
+
+
+
+
+# MORE DETAIL - IF NEEDED #
+
+## Build An Extract Definition
+
+The first step to any analysis using IPUMS data is to decide on a a sample/variable set. This can now be done **entirely through code** with the `define_extract_micro()` function. By specifying an IPUMS `collection`, `samples`, and `variables`, users can create an `ipums_extract` object, and `save_extract_as_json()` or `submit_extract()` to the IPUMS servers.
+
+```{r, echo = TRUE, eval = FALSE}
+
+my_new_extract <- define_extract_micro(collection = "usa",
+                                    samples = "us2019b",
+                                    variables = c("AGE", "SEX", "INCTOT", "EDUC"),
+                                    description = "A simple extract"
+)
+
+my_new_extract %>% save_extract_as_json("new_extract.json")
+
+my_new_extract %>% submit_extract()
+
+```
+
+At this stage, you have everything you need to share your IPUMS data. Just email a colleague the .json file, so they can `define_extract_from_json()` and `submit_extrat()` to get their own version of the data. Note, that `collection = "usa"` must be specified again when reading from a .json file. 
+
+```{r. echo = TRUE, eval = FALSE}
+
+extract_from_friend <- define_extract_from_json("my_new_extract.json", collection = "usa")
+
+extract_from_friend %>% submit_extract()
+
+```
+
+
+
+creating a .json extract definition, submitting, checking, and downloading datathat allow users to interact with the microdata API, and accomplish all these steps. these brandwe've bundled several new functions together into a new [.Rmd template]() to streamline the steps of creating truly reproducible research with IPUMS data. Check our  [interactive report]() to see the **new API template** in action. This is accomplished by a series of helper functionsIn fact, the single most handy feature - in this users opinion - is being able to download **BOTH** data **AND** data dictionary 
+
+
+
+Build initial extract definition online (as before)
+
+
+The microdata API allows users to build extracts totally 'by hand'. This requires users to know the IPUMS mnemonics in order to specify variables. If you know what you need, fill in/add relevant arguments to `extract_definition` in the section below. Otherwise, if you have  previously defined an extract using the online system, simply take note of the **extract number** and enter it below. If you know your **most recent** extract is the one you'd like to use or you are building the extract **'by hand'**, leave `extract_num <- ""` as is. 
+
+If you already have a `.JSON` extract definition from another source, just add it to the `data_dir` folder and this script will read and submit that extract. 
+
+
+
+#### scratch #####
+
+
+First we'll walk through the steps of setting up reproducible research project, then we'll talk about how these get implemented in the **.Rmd for Reproducible Research** in action, as we **create .json extract definitions**, **submit, (check on), and download data**, to create a [portable, reproducible, literately-programed report]()!!
+
+*if derek's post DOES NOT cover basic use of functions, include that here, otherwise just focus on the template and how they fit together*
+
+
+But you realize you can just send them instructions to recreate your extract:
+
+Just a few lists:give them the instructions to rebuild your extract, it's so easy! just a couple...
+
+[ipums project]()
+[get data]()
+
+sreenshots...
+
+[submit extract]()
+[downloads page]() 
+
+Oh and remember:
+
+[download page with save as directions]()
+
+
+At this point, some of you may be asking (or screaming): "isn't there an easier way to share IPUMS data???"
+
+Have you ever tried to share your items data and then remembered oh wait I can't share my data. The items micro data API and items are packaged together let you submit a data extract compile an extract request save it as a JSON file submit that request to the R servers check the status and see if it's available and ready for download and finally download those files both data and the metadata in the DDI directly to whichever project directory you want we've combined many of these steps together into a new R markdown template available in the FM's R package together these steps make it really easy to reproduce and share your research with colleagues
+
+variable viewer of value variance
