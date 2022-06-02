@@ -1,0 +1,68 @@
+{
+    "description": "Extract for .Rmd API template",
+    "data_structure": {
+        "rectangular": {
+            "on": "P"
+        }
+    },
+    "data_format": "fixed_width",
+    "samples": {
+        "us2019b": {
+
+        },
+        "us2018b": {
+
+        },
+        "us2017b": {
+
+        },
+        "us2016b": {
+
+        },
+        "us2015b": {
+
+        }
+    },
+    "variables": {
+        "AGE": {
+
+        },
+        "SEX": {
+
+        },
+        "RACE": {
+
+        },
+        "HISPAN": {
+
+        },
+        "SPEAKENG": {
+
+        },
+        "EDUC": {
+
+        },
+        "EMPSTAT": {
+
+        },
+        "INCTOT": {
+
+        },
+        "MIGRATE1": {
+
+        },
+        "HHINCOME": {
+
+        },
+        "COSTELEC": {
+
+        },
+        "CINETH": {
+
+        },
+        "CPI99": {
+
+        }
+    }
+}
+

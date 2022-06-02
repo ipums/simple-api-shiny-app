@@ -1,0 +1,119 @@
+{
+    "description": "final_api_demo_version",
+    "data_structure": {
+        "rectangular": {
+            "on": "P"
+        }
+    },
+    "data_format": "fixed_width",
+    "samples": {
+        "us2015b": {
+
+        },
+        "us2016b": {
+
+        },
+        "us2017b": {
+
+        },
+        "us2018b": {
+
+        },
+        "us2019b": {
+
+        }
+    },
+    "variables": {
+        "YEAR": {
+
+        },
+        "SAMPLE": {
+
+        },
+        "SERIAL": {
+
+        },
+        "CBSERIAL": {
+
+        },
+        "NUMPREC": {
+
+        },
+        "HHWT": {
+
+        },
+        "CPI99": {
+
+        },
+        "GQ": {
+
+        },
+        "COSTELEC": {
+
+        },
+        "HHINCOME": {
+
+        },
+        "VACANCY": {
+
+        },
+        "CINETHH": {
+
+        },
+        "PERNUM": {
+
+        },
+        "PERWT": {
+
+        },
+        "MOMLOC": {
+
+        },
+        "POPLOC": {
+
+        },
+        "RELATE": {
+
+        },
+        "SEX": {
+
+        },
+        "AGE": {
+
+        },
+        "MARRINYR": {
+
+        },
+        "DIVINYR": {
+
+        },
+        "WIDINYR": {
+
+        },
+        "FERTYR": {
+
+        },
+        "RACE": {
+
+        },
+        "HISPAN": {
+
+        },
+        "SPEAKENG": {
+
+        },
+        "EDUC": {
+
+        },
+        "EMPSTAT": {
+
+        },
+        "INCTOT": {
+
+        },
+        "MIGRATE1": {
+
+        }
+    }
+}
+
