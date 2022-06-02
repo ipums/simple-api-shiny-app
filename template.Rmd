@@ -25,23 +25,39 @@ suppressPackageStartupMessages(suppressWarnings({
 ## Setup - First Time
 
 This script is intended to semi-automate parts of the IPUMS data acquisition process, using the [microdata API]().  In order to run, users must: 
-1. Have an account with one or more IPUMS project: 
-  + **USA, CPS**
+1. Have an account with one or more IPUMS project
 1. Register for an [IPUMS microdata API key](https://developer.ipums.org/docs/apiprogram/)
 1. Add your API key as an [environmental variable](https://tech.popdata.org/ipumsr/dev/)
 
 
 Some Notes on this file:
-This script uses `{.tabset}`s in an attempt to keep the back-end setup and user-facing analysis separate, more organized, and hopefully easier to work with. This script also uses code-folding to keep the knitted HTML report neat.
+This script uses `{.tabset}`s and `code-folding` in an attempt to keep the back-end setup and user-facing analysis separate, more organized, and hopefully easier to work with. 
 
 This script is set up with the intention of being shared, either directly or via github. When sharing,  **do not** share the **data** (`.dat.gz`) or **metadata** (`.xml`) files. This script will automatically download those files for the user using the `.json` **extract definition**. If using github, be sure to add the `.dat.gz` and `.xml` files to `.gitignore`, or store them outside the git repo.
 
 
 ## Setup - Project Parameters
 
-This template makes as few assumptions as possible, yet automates as many steps as possible. Specify a few project parameters, and this script will check on, submit, and download data straight to your specified directory. Once compiled, only the script itself and the `.json` file are needed to share/reproduce the work in this script. There are 4 **key parameters** the user must define in the code chunk below, with additional details following the parameter chunk.
+This template makes it easy for users to share their custom IPUMS data extracts, without directly sharing microdata. 
+* When starting an analysis/project, it handles every step between "creating an extract online" and "analyzing the data". 
+* When sharing the template with others, it will automatically submit, download, and compile the report for the end user in just 2 clicks - allowing you to share interactive, data driven reports with colleagues without needing to send massive data files.  
 
-Once these parameters are specified, Run/Knit this script the first time - It will most likely "fail" and inform you the data is not ready. However, you should now see a `.json` file in the `data_dir`. (if it wasn't there already). Smaller extracts may be ready in just a few minutes, but extracts with many variables/samples may take longer. Simply re-run/knit this script to check on the extract and, once ready, download straight to your specified directory.
+To get started, build your data extract via the Data Cart GUI on [ipums.org](www.ipums.org), and be sure to take note of which IPUMS **collection** you are using (EG, "USA", "CPS"), and which **extract number** you'd like to use. Enter them in the relevant `parameters` below.
+
+Additionally, you'll need to specify a **descriptive name** to help keep track of your files and the **data directory** you'd like your files to go in. With those parameters in place, this script will:
+
+1. Build a `.json` extract definition (if you don't already have one)
+1. Submit/Check on extract
+1. Download data and metadata to specified directory
+1. Relabel files for consistency and legibility.
+
+Fill in the 4 parameters below and click `knit` or run `rmarkdown::render()` to begin. 
+* The first time the script will "fail" and inform you the data is not ready. Smaller extracts may be ready in just a few minutes, but extracts with many variables/samples may take longer.
+  + If it wasn't already present, you should now see a `.json` file in the `data_dir`.
+* Re-running (or re-knitting) the script will check on the status of the specified extract. If it is ready, it will automatically download to the **data_dir** and rename based on **descriptive_name**.
+
+Read on for more info on parameters and the back-end code, or once your data is present, skip ahead to [## Analysis Awaits] to continue as usual. 
+
 
 ```{r project_paramaters}
 
@@ -49,35 +65,11 @@ Once these parameters are specified, Run/Knit this script the first time - It wi
 
 collection <- ""
 
+extract_num <- ""
+
 data_dir <- file.path("Data")
 
 descriptive_name <- ""
-
-extract_num <- ""
-
-#### Creating Data Extract 'By Hand' ####
-
-## DO NOT EDIT IF YOU CREATED/SUBMITTED EXTRACT ONLINE ##
-
-extract_definition <- define_extract_micro(
-  collection = "",
-  description = "",
-  samples = c(""),
-  variables = c(""),
-)
-
-
-# ## Example values
-# extract_definition <- define_extract_micro(
-#   collection = "usa",
-#   description = "Extract for API vignette",
-#   samples = c("us2018a","us2019a"),
-#   variables = c("AGE","SEX","RACE","STATEFIP"),
-#   data_format = "fixed_width",
-#   data_structure = "rectangular",
-#   rectangular_on = "P"
-# )
-
 
 ```
 
@@ -85,6 +77,11 @@ extract_definition <- define_extract_micro(
 
 `collection` The IPUMS data **collection** to query, abbreviated and lower-case. Print `ipums_data_collections()` to see a list of all IPUMS projects and the api-specific name.
   + Note: Currently, only USA and CPS are supported.
+  
+`extract_num` Which extract from the above collection to use, integer only without leading 0s. Leave blank (`""`) for most recent extract:
+  + `extract_num <- 42` For extract "0000042" 
+  + `extract_num <- ""` For most recent
+  
 
 `data_dir` A **directory** to download your **data** (will be created if it does not exist). We recommend storing data, dictionaries, and extract definitions within a sub-folder. The default will create a sub-folder named "Data" within your R project. 
 * If you want to store your files at the **top-level** of the project directory use: 
@@ -95,31 +92,13 @@ extract_definition <- define_extract_micro(
 
 `descriptive_name` IPUMS provides numerical IDs for each data extract by default (eg, `usa_000001.dat.gz, usa_000001.xml`), however these are specific to individual users and can be confusing to keep track of. We recommend users relabel their extracts using a project-/analysis- specific **descriptive name**, eg: "prcs_migration_ex". The script will automatically apply the same `descriptive_name` to the `.json, .dat.gz, .xml`, as well as a `.csv` file used for checking extract status.
 
-`extract_num` The last step is indicate an extract definition. While the microdata API allows users to build extracts 'by hand' via coding, it also requires users to know the IPUMS mnemonics in order to specify variables/samples. **Most users** will probably still build (and submit) their extract definitions online via the Data Cart GUI on [ipums.org](www.ipums.org). 
-* To work with a **past extract**
-  + Take note of the **Extract Number** on your [Download or Revise Data page](https://usa.ipums.org/usa-action/data_requests/download).
-  + Modify `extract_num` 
-  + Run/Knit Script
   
-* To work with your **most recent extract**.
-  + Leave `extract_num <- ""` as is
-  + Run/Knit Script
-
-* To build an extract **by hand**
-  + Leave `extract_num <- ""` as is
-  + Create `extract_definition` by modifying the arguments of `define_extract_micro()` as needed
-  + Run/Knit Script
-  
-* If you **already have a .json extract definition**
-  + Manually add it to the `data_dir` folder
-  + Run/Knit Script
-  
-
 From here, you can skip ahead to [## Analysis Awaits].
 
 #### Initial setup
 
 ```{r}
+
 
 if(!data_dir==""){
 if(!dir.exists(data_dir)){
@@ -135,6 +114,7 @@ if(descriptive_name==""){
   stop("Please specify a descriptive name for files")
 }
 
+
 json_filename <- paste0(descriptive_name,".json")
 data_rename <- paste0(descriptive_name,".dat.gz")
 ddi_rename <- paste0(descriptive_name,".xml")
@@ -144,11 +124,30 @@ json_present <- file.exists(file.path(data_dir, json_filename))
 data_present <- file.exists(file.path(data_dir, data_rename)) &
                    file.exists(file.path(data_dir, ddi_rename))
 
+
 submitted <- file.exists(file.path(data_dir, chk_name))
 
 if(submitted){
 submitted_num <- read.csv(file.path(data_dir, chk_name))[[1]]
 }
+
+
+if(json_present){
+  input_json <- list.files(path = data_dir, pattern = ".json")
+
+
+if(length(input_json) > 1){
+  stop("Multiple .json definitions present, please use a separate data_dir for each .json")
+}
+
+if(!identical(input_json, json_filename)){
+  warning(paste("Updating .json from", input_json, "to", json_filename))
+  file.rename(file.path(data_dir, input_json),
+              file.path(data_dir, json_filename))
+}
+
+}
+
 
 ```
 
@@ -165,6 +164,10 @@ if(is.numeric(extract_num)){
   save_extract_as_json(file = file.path(data_dir,
                                         json_filename)
                        )
+  
+  write.csv(extract_info$number, file.path(data_dir, chk_name), row.names = F)
+  stop(".json created, please re-run to check on data")
+  
 } else if ( extract_num==""){
 
 extract_info <- get_last_extract_info(collection)
@@ -173,11 +176,11 @@ extract_info <- get_last_extract_info(collection)
     save_extract_as_json(file = file.path(data_dir,
                                           json_filename)
                          )
-} else {
-  extract_info <- extract_definition %>% 
-    save_extract_as_json(file = file.path(data_dir,
-                                          json_filename)
-                         )
+  
+   write.csv(extract_info$number, file.path(data_dir, chk_name), row.names = F)
+  
+  stop(".json created, please re-run to check on data")
+
 }
 
 
@@ -185,45 +188,49 @@ extract_info <- get_last_extract_info(collection)
 
 If the json was already present, we skip the above and just read the extract using `ipumsr` functions. 
 ```{r, eval = json_present}
-extract_info <- define_extract_from_json(file.path(data_dir, json_filename), collection)
-```
-
-### Submit and Check on Extract
-
-If you built your extract using the ipums.org website you have already submitted your data request. If you built the extract by hand, or your data have expired, the script will resubmit the extract to the IPUMS servers. If this script initiates a submit, it also adds an file to the `data_dir` folder as a flag to prevent submitting multiple copies of the same extract.
-
-```{r, eval = (!data_present) & (!submitted)}
-
-extract_info <- extract_info %>% submit_extract()
-write.csv(extract_info$number, file.path(data_dir, chk_name), row.names = F)
+extract_info <- define_extract_from_json(file.path(data_dir, json_filename))
 
 ```
 
-
-
-Extract number is needed, but user-specific. If a user did not specify an explicit number, this will read it from the submission.
-
-```{r eval = !data_present}
-
-if(submitted){
-  extract_info$number <- submitted_num
-}
-
-is_data_ready <- is_extract_ready(extract_info)
-
-```
-
-### Download Extract
+#### Submit, Check on, Download Extract
 
 Now that the JSON is in place, we can check on the data. IPUMS only ensures data will be available for 72 hours, after that point users will need to re-submit an extract request. If your data is out of date, this will re-submit for you.
 
-Once we confirm that the extract is, indeed, ready we download BOTH the data and data dictionary and rename based on the specified values above.
+Once we confirm that the extract is indeed ready we download BOTH the data and data dictionary to `data_dir` based on the `descriptive_name` 
 
-```{r, eval = !data_present}
-if(!is_data_ready){
-  stop("Extract not ready. Please wait a few mins and re-run file.",call. = F)
-} 
+```{r, eval = (!data_present) }
 
+if(submitted){
+  extract_info$number <- submitted_num
+
+}
+## FIRST check on the extract
+
+if(is.na(extract_info$number)){
+  ## fresh read from json, need to submit
+  
+  extract_info <- extract_info %>% submit_extract()
+  save_extract_as_json(extract_info, file.path(data_dir, json_filename))
+  write.csv(extract_info$number, file.path(data_dir, chk_name), row.names = F)
+  
+} else {
+  ## check on extract
+extract_info <- get_extract_info(extract_info)
+  already_ready <- is_extract_ready(extract_info)
+if ((!already_ready) & extract_info$status=="completed"){
+  
+  ## stale request, need to re-submit
+   extract_info <- extract_info %>% submit_extract()
+  save_extract_as_json(extract_info, file.path(data_dir, json_filename))
+  write.csv(extract_info$number, file.path(data_dir, chk_name), row.names = F)
+  stop("Specified extract expired, resubmitting, check back in a few mins")
+  
+} else if (already_ready & extract_info$status=="incomplete"){
+  ## data not ready print warning
+   stop("Extract not ready. Please wait a few mins and re-run file.",call. = F)
+} else if (already_ready & extract_info$status=="completed"){
+  ## get data
+  
 ddi_filename <- extract_info %>%
   download_extract(download_dir = data_dir) %>% 
     basename()
@@ -234,10 +241,13 @@ ddi_filename <- extract_info %>%
               file.path(data_dir, ddi_rename))
   file.rename(file.path(data_dir, data_filename),
               file.path(data_dir, data_rename))
+}
+
+}
 
 ```
 
-### Load Data
+#### Load Data
 
 Now we're ready to begin analysis, and your project will be shareable/reproducible for other IPUMS users.
 

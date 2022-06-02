@@ -9,6 +9,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # TO-DO
 
+* modify blog and template so that they both assume that extract will be built online
+* make note that it is possible to create definition by code - outside of scope of this.
+
+* KEY INPUT should be collection and extract number (blank if most recent)
 * read through template, filled, and blog post side by side
   + consistent function names
   + everything runs smoothly
@@ -63,6 +67,7 @@ The basic assumption of the template is that:
 1. You would like to let other (IPUMS users) replicate the work.
 
 The first step in this workflow is to create a `data extract`. IPUMS users will be familiar with using the project-specific Data Cart GUI on ipums.org to create their extracts. While it is possible to create extracts entirely within R (more on that below), many users (this author included) find it helpful to use the website to create and ubmit their extracts, then begin working with the `RRR` as follows.
+
 # Pass the Parameters
 
 **passing dinner gif?**
@@ -111,11 +116,10 @@ The microdata API **does** allow users to build extracts 'by hand' using the `de
   
 ```{r, echo=TRUE, eval=FALSE}
   
-extract_definition <- define_extract_micro(
-  collection = "usa",
+extract_definition <- define_extract_usa(
   description = "Extract for .Rmd API template",
   samples = c("us2019b","us2018b","us2017b","us2016b","us2015b"),
-  variables = c("AGE","SEX","RACE","HISPAN","SPEAKENG", "EDUC", "EMPSTAT", "INCTOT", "MIGRATE1", "HHINCOME","COSTELEC","CINETH", "CPI99")
+  variables = c("AGE","SEX","RACE","HISPAN","SPEAKENG", "EDUC", "EMPSTAT", "INCTOT", "MIGRATE1", "HHINCOME","COSTELEC","CINETHH", "CPI99")
 )
 
 ```
