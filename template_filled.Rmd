@@ -7,8 +7,11 @@ output:
 
 ```{r setup, include=FALSE, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE,
-                      dpi = 72,
-                      fig.retina = 1)
+                      fig.retina = 1,
+                      out.width = "75%",
+                      out.height = "75%")
+
+
 ```
 
 
@@ -19,14 +22,13 @@ suppressPackageStartupMessages(suppressWarnings({
 }))
 
 ```
-
-
-# tabset
+# {.tabset}
 
 ## Setup - First Time
 
 This script is intended to semi-automate parts of the IPUMS data acquisition process, using the [microdata API]().  In order to run, users must: 
-1. Have an ipums account registered with one or more of **USA, CPS**
+1. Have an account with one or more IPUMS project: 
+  + **USA, CPS**
 1. Register for an [IPUMS microdata API key](https://developer.ipums.org/docs/apiprogram/)
 1. Add your API key as an [environmental variable](https://tech.popdata.org/ipumsr/dev/)
 
@@ -34,23 +36,21 @@ This script is intended to semi-automate parts of the IPUMS data acquisition pro
 Some Notes on this file:
 This script uses `{.tabset}`s in an attempt to keep the back-end setup and user-facing analysis separate, more organized, and hopefully easier to work with. This script also uses code-folding to keep the knitted HTML report neat.
 
-This script is set up with the intention of being shared via github, but you **should not** include the `.dat.gz` or `.xml` files in the git repo. Consider adding the following, or similar, to `.gitignore`: 
-"Data/**.dat.gz",
-"Data/**.xml", 
-"Data/**.csv"
+This script is set up with the intention of being shared, either directly or via github. When sharing,  **do not** share the **data** (`.dat.gz`) or **metadata** (`.xml`) files. This script will automatically download those files for the user using the `.json` **extract definition**. If using github, be sure to add the `.dat.gz` and `.xml` files to `.gitignore`, or store them outside the git repo.
+
 
 
 ## Setup - Project Parameters
 
 This template makes as few assumptions as possible, yet automates as many steps as possible. Specify a few project parameters, and this script will check on, submit, and download data straight to your specified directory. Once compiled, only the script itself and the `.json` file are needed to share/reproduce the work in this script. There are 4 **key parameters** the user must define in the code chunk below, with additional details following the parameter chunk.
 
-Once these parameters are specified, Run/Knit this script the first time - It will most likely "fail" and inform you the data is not ready. However, you should now see {r json_filename} in the `data_dir`. (if it wasn't there already). Smaller extracts may be ready in just a few minutes, but extracts with many variables/samples may take longer. Simply re-run/knit this script to check on the extract and, once ready, download straight to your specified directory.
+Once these parameters are specified, Run/Knit this script the first time - It will most likely "fail" and inform you the data is not ready. However, you should now see a `.json` file in the `data_dir`. (if it wasn't there already). Smaller extracts may be ready in just a few minutes, but extracts with many variables/samples may take longer. Simply re-run/knit this script to check on the extract and, once ready, download straight to your specified directory.
 
 ```{r project_paramaters}
 
 #### Key Parameters #####
 
-collection <- "usa" ## c("usa", "cps")
+collection <- "usa"
 
 data_dir <- file.path("Data")
 
@@ -86,18 +86,19 @@ extract_definition <- define_extract_micro(
 
 ### Parameter Definitions
 
-**collection** The IPUMS data collection to query, abbreviated and lower-case. Currently only USA and CPS are supported, ie: "usa", "cps"
+`collection` The IPUMS data **collection** to query, abbreviated and lower-case. Print `ipums_data_collections()` to see a list of all IPUMS projects and the api-specific name.
+  + Note: Currently, only USA and CPS are supported.
 
-**data_dir** Where to download your data (will be created if it does not exist). We recommend storing data, dictionaries, and extract definitions within a sub-folder. The default will create a sub-folder named "Data." within your R project. 
+`data_dir` A **directory** to download your **data** (will be created if it does not exist). We recommend storing data, dictionaries, and extract definitions within a sub-folder. The default will create a sub-folder named "Data" within your R project. 
 * If you want to store your files at the **top-level** of the project directory use: 
   + `data_dir <- file.path("")`.
 * If you want to store your files **outside** of the project directory use:
   + `data_dir <- file.path("..","Data")` to store in a sibling-directory to the project directory.
   + The `".."` goes "up" one level within a folder system.
 
-**descriptive_name** IPUMS provides numerical IDs for each data extract by default (eg, `usa_000001.dat.gz, usa_000001.xml`), however these are specific to individual users and can be confusing to keep track of. We recommend users relabel their extracts using a project- or analysis-specific descriptive name, eg: "prcs_migration_ex". The script will automatically apply the same `descriptive_name` to the `.json, .dat.gz, .xml`, as well as a `.csv` file used for checking extract status.
+`descriptive_name` IPUMS provides numerical IDs for each data extract by default (eg, `usa_000001.dat.gz, usa_000001.xml`), however these are specific to individual users and can be confusing to keep track of. We recommend users relabel their extracts using a project-/analysis- specific **descriptive name**, eg: "prcs_migration_ex". The script will automatically apply the same `descriptive_name` to the `.json, .dat.gz, .xml`, as well as a `.csv` file used for checking extract status.
 
-**extract_num** The last step is indicate an extract definition. While the microdata API allows users to build extracts 'by hand' via coding, it also requires users to know the IPUMS mnemonics in order to specify variables, samples, etc. **Most users** will probably still build (and submit) their extract definitions online via the Data Cart GUI on [ipums.org](www.ipums.org). 
+`extract_num` The last step is indicate an extract definition. While the microdata API allows users to build extracts 'by hand' via coding, it also requires users to know the IPUMS mnemonics in order to specify variables/samples. **Most users** will probably still build (and submit) their extract definitions online via the Data Cart GUI on [ipums.org](www.ipums.org). 
 * To work with a **past extract**
   + Take note of the **Extract Number** on your [Download or Revise Data page](https://usa.ipums.org/usa-action/data_requests/download).
   + Modify `extract_num` 
@@ -109,7 +110,7 @@ extract_definition <- define_extract_micro(
 
 * To build an extract **by hand**
   + Leave `extract_num <- ""` as is
-  + Modify `extract_definition` as needed
+  + Create `extract_definition` by modifying the arguments of `define_extract_micro()` as needed
   + Run/Knit Script
   
 * If you **already have a .json extract definition**
@@ -117,7 +118,8 @@ extract_definition <- define_extract_micro(
   + Run/Knit Script
   
 
-From here, you can skip ahead to [Analysis Awaits].
+From here, you can skip ahead to [## Analysis Awaits].
+
 
 #### Initial setup
 
@@ -201,8 +203,6 @@ write.csv(extract_info$number, file.path(data_dir, chk_name), row.names = F)
 
 ```
 
-
-
 Extract number is needed, but user-specific. If a user did not specify an explicit number, this will read it from the submission.
 
 ```{r eval = !data_present}
@@ -251,11 +251,7 @@ data <- read_ipums_micro(ddi, data_file = file.path(data_dir, data_rename))
 
 ```
 
-
-
-## Analysis Awaits active
-
-Begin exploring and visualizng your data!
+## Analysis Awaits {.active}
 
 ```{r prep-data}
 # Prep education variable
@@ -320,7 +316,7 @@ data <- data %>%
   mutate(age_group = age_to_age_group(AGE))
 ```
 
-### Migration 2015-2019 tabset
+### Migration 2015-2019 {.tabset}
 
 The percentage of people who had moved in the last year increased between 2017 
 and 2018 from about 6% to over 8% among all persons in Puerto Rico, but the 
@@ -334,7 +330,7 @@ point estimates, follow the
 
 #### Overall
 
-```{r migration-graph-1, echo = FALSE}
+```{r migration-graph-1, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
 data %>% 
   filter(!is.na(moved_in_last_year)) %>% 
   group_by(YEAR) %>% 
@@ -352,7 +348,7 @@ data %>%
 
 #### By education
 
-```{r migration-graph-2, echo = FALSE}
+```{r migration-graph-2, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
 data %>% 
   filter(!is.na(moved_in_last_year)) %>% 
   filter(AGE >= 25) %>%
@@ -374,7 +370,7 @@ data %>%
 
 #### By household income
 
-```{r migration-graph-3, echo = FALSE}
+```{r migration-graph-3, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
 data %>% 
   filter(!is.na(moved_in_last_year)) %>% 
   filter(!is.na(hhincome_quintile)) %>% 
@@ -396,7 +392,7 @@ data %>%
 
 #### By age
 
-```{r migration-graph-4, echo = FALSE}
+```{r migration-graph-4, dpi=300, fig.height=5, fig.width=8, echo = FALSE}
 data %>% 
   filter(!is.na(moved_in_last_year)) %>% 
   group_by(YEAR, age_group) %>% 
