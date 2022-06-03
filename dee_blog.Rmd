@@ -4,7 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 # TO-DO
@@ -29,27 +29,31 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Reproducibility with ipumsr + API
 
-Have you ever wanted to share a project using IPUMS data with a colleage and remembered **remembered**, [I can't redistribute my ipums data :(](blog.popdata.org).  
+Have you ever wanted to share a project using IPUMS data with a colleague and  **remembered**, [I can't redistribute my ipums data :(](https://www.ipums.org/about/terms).  
 
-Maybe you'd like a colleague to replicate your findings, or **some kind of teaching example**. In the past, if you wanted to someone to use the same data you would need to provide a list of variables and instructions to click through the Data Cart GUI. 
+Maybe you'd like a colleague to replicate your findings. Or maybe you're a teacher with an exercise you'd like your students to review and replicate. In the past, if you wanted to someone to use the same data that you did, you would need to provide a list of samples/variables and instructions for your collaborator on how to navigate the the Data Cart GUI. 
 
-**but wait there's more**
-
-The [new ipums microdata API](blog.popdata.org) makes it easier than ever to share your [extract definitions](blog.popdata.org) with fellow IPUMS users. Using the **microdata API**, you can:
+If you're thinking that sounds like a pain, don't worry, the brand new [ipums microdata API](https://beta.developer.ipums.org/docs/apiprogram/) makes it easier than ever to share your **extract definitions** with fellow IPUMS users!!! Using the **microdata API**, you can:
 * Record your extract definition as a .json file. These files are:
   + Easy to revise
   + Easy to share
 * Submit your extract to IPUMS servers
-  + No need to click a single button on the website (unless you want to use the website)
+  + No need to click a single button on the website 
+  + (unless you want to use the website! Read on for more)
 * Download data **and** meta data directly into a project directory
   + This feature is a personal favorite
   
+**applause gif**
 
-The latest versions of [ipumsr](https://tech.popdata.org/ipumsr/dev/)/[ipumspy]() contains brand new functions allowing users to call on the IPUMS microdata API directly from their R/Rstudio.* Check out our [other posts]() about [getting an API key]() and [something else](), for more info on [a relevant point](). 
+The latest versions of [ipumsr](https://tech.popdata.org/ipumsr/) contains new functions allowing users to call on the IPUMS microdata API directly from their R/Rstudio. Python users should check out [ipumspy](https://ipumspy.readthedocs.io/en/latest/index.html). For more on the **microdata API** check out our other posts:
 
-We've bundled several of these functions together into an template in the ipumsr package, the [.Rmd for reproducible research (RRR)](https://github.com/ipums/simple-api-shiny-app/filled_template.html). This template automates many of the above steps, needing only 4 parameters from the user. Read on to learn more about the **new ipumsr API functions** and how we put them together to facilitate data sharing and reproducible research. As a bonus, we've also included a simple Shiny App: the [Variable Variation Value Viewer (VVVV)](https://github.com/ipums/simple-api-shiny-app/VVVV). 
+* [Introduction to the API]()
+* [Using the API with ipumsr]()
+* [Using the API with STATA]()
+* [Sharing extracts with API]()
 
-* **Note:** The app is not inteded to be a "one size fits all" viewer for ipums data (though it *should* work for any combination of variables/samples in IPUMS USA). Rather, we hope this can help make shiny development more accessible and encourage new and exciting uses of IPUMS data. Note that this is not a live app, but one that can be compiled to run locally. 
+We've bundled several of these functions together into an template in the ipumsr package, the [.Rmd for reproducible research (RRR)](https://github.com/ipums/simple-api-shiny-app/filled_template.html). This template automates many of the above steps, needing only 4 parameters from the user. Read on to learn more about the **new ipumsr API functions** and how we put them together to facilitate data sharing and reproducible research. As a bonus, we've also included a simple Shiny App: the [Variable Variation Value Viewer (VVVV)](https://github.com/ipums/simple-api-shiny-app/VVVV), which uses these functions in a similar way to create a self-compiling web-app.
+
 
 The key feature to both the `RRR` and `VVVV` is that they **do not** contain any **data** or **metadata**. 
 
@@ -59,30 +63,174 @@ Instead, they use the `.json extract definition` to create and submit a **new da
 
 **hold on to your butts**
 
+
 The basic assumption of the template is that:
 
 1. You have registered with with IPUMS USA (or IPUMS CPS)
-1. You have registered for your own unique a [microdate API key](**link about registering**) and [added it to your .Renviron](**link to derek post?**)
-1. You have a specific dataset you want to download, analyze, and visualize **and** 
+1. You have registered for your own unique [microdate API key](https://account.ipums.org/api_keys) 
+1. You have [added it to your .Renviron](https://tech.popdata.org/ipumsr/reference/set_ipums_api_key.html)
+1. You have a specific dataset you want to download, analyze, and visualize **and/or** 
 1. You would like to let other (IPUMS users) replicate the work.
 
-The first step in this workflow is to create a `data extract`. IPUMS users will be familiar with using the project-specific Data Cart GUI on ipums.org to create their extracts. While it is possible to create extracts entirely within R (more on that below), many users (this author included) find it helpful to use the website to create and ubmit their extracts, then begin working with the `RRR` as follows.
+The first step in this workflow is to create a **data extract**. IPUMS users will be familiar with using the project-specific Data Cart GUI on ipums.org to create their extracts. While it is possible to create extracts entirely within R ([more on that elsewhere]()), many users (this author included) find it helpful to use the website to create and submit their extracts, then begin working with the `RRR` as follows.
 
-# Pass the Parameters
+For this example, we're using IPUMS USA data, specifically looking at the Puerto Rican Community Survey from the years 2015-2019. 
 
-**passing dinner gif?**
+To get started in R, make sure to update `ipumsr`, then select our new `RRR template`.
 
-The template makes as few assumptions as possible, yet automates as many steps as possible. Upon opening the template, users will be prompted for 4 key parameters. With these in place,the script will check on, submit, and download data straight to your specified directory. Once compiled, only the script itself and the `.json` file are needed to share/reproduce the work in this script - or you could provide the interactive .html report. 
 
-**maybe use a screenshot instead**
+```{r,fig.show="hold", out.width="25%"}
 
-**2, 1 empty, 1 filled**
+knitr::include_graphics(file.path("Images","rmd_template_1.png"))
 
-```{r, echo = FALSE}
+knitr::include_graphics(file.path("Images","rmd_template_2.png"))
 
-## screenshots
 
 ```
+
+
+Now here we are, looking at a (possibly) overwhelming amount of code. But don't worry! We've tried to make this as painless as possible. In fact, this template can run out of the box, defaulting to **IPUMS USA** and your **most recent extract**. Since this *just so happens* to be the extract I'd like to work with, I can proceed without making **any edits**, simply by clicking `Knit` or running `rmarkdown::render()`.
+
+
+
+```{r,fig.show="hold", out.width="25%"}
+
+knitr::include_graphics(file.path("Images","rmd_initial_open.png"))
+
+
+```
+
+
+And awaaaaaaay it goes! All that's left to do is sit back, relax, and - 
+
+
+...wait, is that an error???
+
+
+```{r,fig.show="hold", out.width="25%"}
+
+knitr::include_graphics(file.path("Images","open2-not_an_error.png"))
+
+
+```
+
+**GIMLI GIF**
+
+
+
+No! See, as both the 'error message' and our friend *Gimli* indicate - that's not an error! The `RRR` is set up to be run/Knit a few times, at your leisure. The reason for this is to ensure that the IPUMS servers have time to process your data requests. But look, something **did** happen - we've added a subfolder named `Data`. And within that are two new files: **a .json extract definition** and a `chk_....csv` file. The first file contains all the information needed to get your data (or to share with friends/loved ones) and the second file, you don't need to worry about!
+
+
+```{r,fig.show="hold", out.width="33%"}
+
+knitr::include_graphics(file.path("Images","open1a.png"))
+
+knitr::include_graphics(file.path("Images","open2a.png"))
+```
+
+```{r,fig.show="hold", out.width="50%"}
+knitr::include_graphics(file.path("Images","open2a.png"))
+
+
+```
+
+
+Now, you may have noticed that these filed are both called "template," and you might be wondering why. This is one of the the default parameters of the `RRR`. Users will want to edit this, which can easily be done in the first code-chunk of the `RRR`, depending on your window/font size, you may need to scroll. Or you can use the **Table of Contents** to jump down to **Setup-Project Parameters.** We'll set this to a more descriptive names since our main focus will be migration rates in Puerto Rico. 
+
+```{r,fig.show="hold", out.width="50%"}
+knitr::include_graphics(file.path("Images","params.png"))
+
+
+knitr::include_graphics(file.path("Images","params_filled.png"))
+
+```
+
+
+Since we've changed the `descriptive_name` parameter, it's helpful to delete the `.json` and `chk_.csv` files with the old name, "template", before proceeding (if you set a proper descriptive name in the first place, you would not need to delete anything). With the name updated, awaaaay we knit!
+
+
+And with just 2 clicks, we've pulled our most recent IPUMS USA data DIRECTLY into our Rproj! (I really can't overstate how cool this feature is). You'll notice there's some basic descriptive information included by default. Feel free to replace these as you develop your analyses. 
+
+
+```{r,fig.show="hold", out.width="50%"}
+
+
+knitr::include_graphics(file.path("Images","open4a.png"))
+
+knitr::include_graphics(file.path("Images","open4.png"))
+
+```
+
+
+From here, we can fill out the remainder of the `RRR` with whatever analysis we'd like such as plotting migration rates over time. To check out the full features of the `RRR`, be sure to check out [github.com/ipums/simple-api-shiny-app](https://github.com/ipums/simple-api-shiny-app). Clone the repo to try out the interactive tabset .HTML report for yourself. Or check out the [pre-rendered version](https://htmlpreview.github.io/?https://github.com/ipums/simple-api-shiny-app/blob/main/prcs_migration_ex.html), though many features such as code-folding are not available in this version.
+
+
+```{r,fig.show="hold", out.width="50%"}
+
+knitr::include_graphics(file.path("Images","mig1.png"))
+
+```
+
+
+
+
+```{r,fig.show="hold", out.width="50%"}
+
+knitr::include_graphics(file.path("Images","mig2.png"))
+knitr::include_graphics(file.path("Images","mig3.png"))
+knitr::include_graphics(file.path("Images","mig4.png"))
+
+```
+
+
+Also included in this repo is the [Variable Variation Value Viewer (VVVV)](https://github.com/ipums/simple-api-shiny-app/VVVV). This app follows the same steps as the `RRR`, however it also makes use of the `wait_for_extract()` function. Thats right, you can define, submit, wait, and download your IPUMS data all automatically...though you may be waiting a while for larger extracts. The etract used in this example is intentionall small so that users do not need to wait long (avg < 1 min) for the app to load. As mentioned above, this is not meant to be a robust, one-size-fits all app. But it does provide a petty neat way to show users what you've done...
+
+
+```{r,fig.show="hold", out.width="50%"}
+
+knitr::include_graphics(file.path("Images","vvvv_1.png"))
+
+```
+
+
+And let them explore further trends...
+
+
+```{r,fig.show="hold", out.width="33%"}
+
+knitr::include_graphics(file.path("Images","vvvv_2.png"))
+knitr::include_graphics(file.path("Images","vvvv_5.png"))
+
+```
+
+Complete with metadata
+
+
+```{r,fig.show="hold", out.width="50%"}
+knitr::include_graphics(file.path("Images","vvvv_3.png"))
+
+```
+
+We hope this inspires some cool new uses of IPUMS data. Happy coding and remember,
+
+Use it for Good.
+
+
+
+
+
+
+
+
+
+
+#  vvv TO DELETEMORE DETAIL vvvv #
+
+
+
+
+
+
 
 To go over these parameters in a little more detail:
 
@@ -112,95 +260,20 @@ To go over these parameters in a little more detail:
 
 The microdata API **does** allow users to build extracts 'by hand' using the `define_extract_micro()` function. Users can specify arugments for this in the parameters of the `RRR` template. If you would like to do so, leave `extract_num <-""` as in, and modify `extract_definition` as needed. It should be noted that big extracts could quickly become unwieldy to type out, and this approach require users to know the IPUMS mnemonics in order to specify variables, samples, etc. In practice, it might be easier to build your extract online, until you become more familiar with the shorthand. Hard coding an extract definition takes just 4 arguments to `define_extract_mictro()`.
 
-**again, screenshots**
-  
-```{r, echo=TRUE, eval=FALSE}
-  
-extract_definition <- define_extract_usa(
-  description = "Extract for .Rmd API template",
-  samples = c("us2019b","us2018b","us2017b","us2016b","us2015b"),
-  variables = c("AGE","SEX","RACE","HISPAN","SPEAKENG", "EDUC", "EMPSTAT", "INCTOT", "MIGRATE1", "HHINCOME","COSTELEC","CINETHH", "CPI99")
-)
+And within that
+**passing dinner gif?**
+
+The template makes as few assumptions as possible, yet automates as many steps as possible. Upon opening the template, users will be prompted for 4 key parameters. With these in place,the script will check on, submit, and download data straight to your specified directory. Once compiled, only the script itself and the `.json` file are needed to share/reproduce the work in this script - or you could provide the interactive .html report. 
+
+**maybe use a screenshot instead**
+
+**2, 1 empty, 1 filled**
+
+```{r, echo = FALSE}
+
+## screenshots
 
 ```
-
-From here, the `RRR` is ready to go! It is set up to generate an (interactive) .HTML report. All we have to do is click the knit button, or run `rmarkdown::render()`. and away it goes....
-
-
-**knit button** | code, 
-
-...wait is that an error???
-
-**gimli gif** - that was deliberate
-
-Don't worry! It takes time for the ipums servers to process the data extracts, query the IPUMS repository for your samples and variables, and compile the resulting files. Running the template the first time will submit your data and add a "flag" file to ensure you don't resubmit while you're waiting for your data to be prepared.
-
-Re-running the script **WILL** check on the status of your extract and, once ready, download it directly to the `data_dir` specified. That's right, your **data** and **metadata** will be downloaded, together, in one step. No more "left click download button, right click and 'save target as...' on the DDI link, manually copy/paste both files into project dir"
-
-**before/after file download pics**
-
-In fact, if you know which extract you'd like to download (and you know it's ready you can download your data **and** metadata in a **single line.** The following would download *my* 42nd data extract from IPUMS USA - assuming the extract is ready to go - directly to my working drive.(*personally, I think this is the most handy single feature of the API*).
-
-```{r}
-ipumsr::download_extract(c("usa", 42))
-```
-
-**appluase gif**
-
-So after what has felt like an eternity, but was actually probably just a few minutes of waiting, we re-knit the script to download and load the data.
-
-**Screenshot of knit**
-
-**sreenshot of data folder**
-
-Once your data/metadata files are populated you're ready to go with analysis! 
-
-
-**screenshot of analysis awaits**
-  with text
-  as rendered
-  
-
-With your analysis in place, it's time to compile the final report. So just re-knit!
-
-**really?**
-
-As long as the `.dat.gz` and `.xml` files are present, the script **will not** submit, or download new data. It will proceed with compiling the HTML output. In order to **SHARE YOUR BEAUTIFUL WORK**, you can send the `.Rmd` file and the accompanying `.json` file (in the appropriate `data_dir`). When colleagues run it the script will:
-
-1. First time, Warn user to wait and try again in a few mins
-1. Download and rename data, proceed with analysis, generate and open polished html report!
-
-That's it! In just 2 clicks of Rstudio, you can have a polished report - that users can exand upon. All the code is in place for them to add further analysis, or visualize data in new ways. 
-
-For teachers, your code can serve as an example that students could replicate on other samples or variables. In fact, it's easy to modify an existing `.json` defintion with:
-
-```{r}
-
-## load extract
-## modify extract
-## save new extract
-
-```
-
-
-With the new extract, open a new `.RRR` template and begin the process again - or copy over whatever relevant work there is!
-
-**NOTE:** Feel free to delete any **text** in the `.RRR template`, but leave the **code** in place to ensure the automated steps function properly! 
-
-
-
-
-
-
-
-# VVVV
-
-Do I have time for this ???
-
-
-
-
-# MORE DETAIL - IF NEEDED #
 
 ## Build An Extract Definition
 
@@ -245,7 +318,6 @@ If you already have a `.JSON` extract definition from another source, just add i
 
 
 
-#### scratch #####
 
 
 First we'll walk through the steps of setting up reproducible research project, then we'll talk about how these get implemented in the **.Rmd for Reproducible Research** in action, as we **create .json extract definitions**, **submit, (check on), and download data**, to create a [portable, reproducible, literately-programed report]()!!
