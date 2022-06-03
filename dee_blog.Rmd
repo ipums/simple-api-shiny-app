@@ -142,7 +142,7 @@ knitr::include_graphics(file.path("Images","open4.png"))
 ```
 
 
-From here, we can fill out the remainder of the `RRR` with whatever analysis we'd like such as plotting migration rates over time. To check out the full features of the `RRR`, be sure to check out [github.com/ipums/simple-api-shiny-app](https://github.com/ipums/simple-api-shiny-app). Clone the repo to try out the interactive tabset .HTML report for yourself. Or check out the [pre-rendered version](https://htmlpreview.github.io/?https://github.com/ipums/simple-api-shiny-app/blob/main/prcs_migration_ex.html), though many features such as code-folding are not available in this version.
+From here, we can fill out the remainder of the `RRR` with whatever analysis we'd like such as plotting migration rates over time. To check out the full features of the `RRR`, be sure to check out [github.com/ipums/simple-api-shiny-app](https://github.com/ipums/simple-api-shiny-app). Clone the repo to try out the interactive tabset .HTML report for yourself. Or check out the [pre-rendered version](https://github.com/ipums/simple-api-shiny-app/blob/main/prcs_migration_ex.html), though many features such as code-folding are not available in this version.
 
 
 ```{r,fig.show="hold", out.width="50%"}
