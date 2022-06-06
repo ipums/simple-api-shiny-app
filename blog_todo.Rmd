@@ -12,21 +12,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # TO-DO
 
-* modify blog and template so that they both assume that extract will be built online
-* make note that it is possible to create definition by code - outside of scope of this.
 
-* KEY INPUT should be collection and extract number (blank if most recent)
-* read through template, filled, and blog post side by side
-  + consistent function names
-  + everything runs smoothly
-* add template to ipumsr **branch**
-* make screenshots of running template
-    + template should be added to ipumsr **before screenshots**
-    
-* check over and link approrpriate blog posts
-* double check all links
-* modify puerto rico extract to include more targeted variables
-* check all links within migration .Rmd
+
+* make note that it is possible to create definition by code - outside of scope of this. **add a link??**
+
 
 
 
