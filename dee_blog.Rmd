@@ -23,7 +23,7 @@ If you're thinking that sounds like a pain, don't worry, the brand new [ipums mi
 * Download data **and** meta data directly into a project directory
   + This feature is a personal favorite
   
-**applause gif**
+![dwayne johnson clapping](Images/the-rock-applause.gif)
 
 The latest versions of [ipumsr](https://tech.popdata.org/ipumsr/) contains new functions allowing users to call on the IPUMS microdata API directly from their R/Rstudio. Python users should check out [ipumspy](https://ipumspy.readthedocs.io/en/latest/index.html). For more on the **microdata API** check out our other posts:
 
@@ -32,7 +32,8 @@ The latest versions of [ipumsr](https://tech.popdata.org/ipumsr/) contains new f
 * [Using the API with STATA]()
 * [Sharing extracts with API]()
 
-We've bundled several of these functions together into an template in the ipumsr package, the [.Rmd for reproducible research (RRR)](https://github.com/ipums/simple-api-shiny-app/filled_template.html). This template automates many of the above steps, needing only 4 parameters from the user. Read on to learn more about the **new ipumsr API functions** and how we put them together to facilitate data sharing and reproducible research. As a bonus, we've also included a simple Shiny App: the [Variable Variation Value Viewer (VVVV)](https://github.com/ipums/simple-api-shiny-app/VVVV), which uses these functions in a similar way to create a self-compiling web-app.
+
+As a bonus, we've bundled several of these functions together into a new template, the [.Rmd for reproducible research (RRR)](https://github.com/ipums/simple-api-shiny-app/filled_template.html), now available from the [ipumsr development version](https://tech.popdata.org/ipumsr/dev/) This template automates many of the above steps, needing only 4 parameters from the user. Read on to learn more about the **new ipumsr API functions** and how we put them together to facilitate data sharing and reproducible research. This template is very much in beta, so be sure to **give us feedback**, let us know what features you like/don't like, by [emailing us]() or [starting a request on github](). As an even-more-beta-bonus, we've included a simple Shiny App: the [Variable Variation Value Viewer (VVVV)](https://github.com/ipums/simple-api-shiny-app/VVVV), which uses these functions in a similar way to create a self-compiling web-app.
 
 
 The key feature to both the `RRR` and `VVVV` is that they **do not** contain any **data** or **metadata**. 
@@ -41,7 +42,7 @@ The key feature to both the `RRR` and `VVVV` is that they **do not** contain any
 
 Instead, they use the `.json extract definition` to create and submit a **new data extract** the first time the script is run. By sharing as few as two files, you can allow a colleague, student, or family member to download the exact same IPUMS data you used in order to replicate or further explore your work. We hope this helps make research more accessible and repeatable. Read on to see the RRR in action, as we explore some data from IPUMS USA, the [Puerto Rican Community Survey](https://usa.ipums.org/usa/sampdesc.shtml#us2019b).
 
-**hold on to your butts**
+!["hold on to your butts" meme](Images/holdontoyourbutts.gif)
 
 
 The basic assumption of the template is that:
@@ -74,10 +75,7 @@ Now here we are, looking at a (possibly) overwhelming amount of code. But don't 
 
 
 ```{r,fig.show="hold", out.width="25%"}
-
 knitr::include_graphics(file.path("Images","rmd_initial_open.png"))
-
-
 ```
 
 
@@ -94,7 +92,9 @@ knitr::include_graphics(file.path("Images","open2-not_an_error.png"))
 
 ```
 
-**GIMLI GIF**
+
+
+![gimli from lord of the rings saying "it was deliberate"](Images/gimli-the-lord-of-the-rings.gif)
 
 
 
